@@ -33,6 +33,8 @@ private/local.json      Optional private booking details; never committed
 
 The Traveler may merge these sources in memory, but it must remain usable when runtime and private files are absent.
 
+The browser Traveler can select any same-origin TripSpec with `?trip=path/to/trip.json`. When `generated.routeDataFile` is absent, unavailable, or belongs to another `trip.id`, the Traveler keeps working with straight anchor lines and displays a route-data notice.
+
 ## Route semantics
 
 `anchorPlaceIds` changes the driven route. Use it only for:

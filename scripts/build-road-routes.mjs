@@ -1,9 +1,13 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
-import { deriveRouteSegments } from "./derive-route-segments.mjs";
+import { deriveRouteSegments, validateTripSpec } from "../src/trip-spec.mjs";
 
 const tripFile = process.argv[2] || "data/cross-canada.trip.json";
 const spec = JSON.parse(await readFile(tripFile, "utf8"));
+const validationErrors = validateTripSpec(spec);
+if (validationErrors.length) {
+  throw new Error(`TripSpec validation failed:\n- ${validationErrors.join("\n- ")}`);
+}
 const segments = deriveRouteSegments(spec);
 const outputFile = spec.generated?.routeDataFile || "data/road-routes.json";
 

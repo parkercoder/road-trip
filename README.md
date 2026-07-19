@@ -29,9 +29,15 @@ python3 -m http.server 8766
 
 Open `http://localhost:8766`.
 
+To open another same-origin TripSpec without changing the app, pass its path in the URL:
+
+```text
+http://localhost:8766/?trip=examples%2Flakes-and-pines.trip.json
+```
+
 ## Customize a Trip
 
-The Traveler reads its current public demo from [`data/cross-canada.trip.json`](data/cross-canada.trip.json). Edit or replace that TripSpec to change the cards, route anchors, ferries, stays, activities, and charging markers; `index.html` contains presentation logic only.
+The Traveler reads its default public demo from [`data/cross-canada.trip.json`](data/cross-canada.trip.json). Edit that file or select another same-origin JSON file with the `trip` query parameter to change the cards, route anchors, ferries, stays, activities, and charging markers.
 
 Only origins, destinations, ferry terminals, and required charging stops should be route anchors. Optional attractions should remain activities or optional stops so they do not force a detour.
 
@@ -39,6 +45,7 @@ New integrations should target [`TripSpec V1`](docs/TRIP-SPEC-V1.md). The canoni
 
 ```bash
 npm run check:tripspec
+npm test
 ```
 
 After changing route anchors, regenerate road geometry from the same TripSpec:
@@ -63,10 +70,15 @@ road-trip/
 ├── data/cross-canada.trip.json
 ├── index.html
 ├── data/road-routes.json
+├── src/trip-spec.mjs
+├── src/traveler-app.mjs
 ├── scripts/build-road-routes.mjs
+├── tests/*.test.mjs
 ├── vendor/leaflet/
 └── .github/
 ```
+
+`src/trip-spec.mjs` is the shared TripSpec runtime used by the Traveler, validators, tests, and route builder. A TripSpec without `generated.routeDataFile` remains usable with straight anchor lines. A route file whose `tripId` does not match the selected trip is rejected with a visible fallback notice.
 
 ## Contributing
 
