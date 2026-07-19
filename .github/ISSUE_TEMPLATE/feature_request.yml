@@ -1,18 +1,18 @@
-name: Feature request
-description: Suggest an improvement
+name: Feature request / 功能建议
+description: Suggest an improvement / 提出改进建议
 title: "[Feature]: "
 labels: [enhancement]
 body:
   - type: textarea
     id: use-case
     attributes:
-      label: Travel use case
-      description: What should become easier for the traveler?
+      label: Travel use case / 旅行使用场景
+      description: What should become easier for the traveler? / 哪些事情应该让旅行者更容易完成？
     validations:
       required: true
   - type: textarea
     id: proposal
     attributes:
-      label: Proposed behavior
+      label: Proposed behavior / 建议的行为
     validations:
       required: true
