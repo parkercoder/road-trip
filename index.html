@@ -1,0 +1,1185 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, minimum-scale=1, user-scalable=no">
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+  <meta name="description" content="A mobile-first road trip map with swipeable travel cards, route overlays, location sharing, and hazard alerts.">
+  <meta name="theme-color" content="#fffcef">
+  <title>Road Trip</title>
+  <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
+  <style>
+    :root {
+      color-scheme: light;
+      --card: rgba(255, 252, 239, .97);
+      --card-solid: #fffcef;
+      --text: #172033;
+      --muted: #667085;
+      --line: rgba(23, 32, 51, .16);
+      --primary: #0f5fd7;
+      --primary-text: #fff;
+      --out: #1769d1;
+      --back: #d46a1f;
+      --ferry: #7c3aed;
+      --camp: #238642;
+      --hotel: #277a9f;
+      --activity: #b23b3b;
+      --charge: #c89b16;
+      --warn: #f59e0b;
+      --warn-soft: #fff1d6;
+      --ok: #dff4df;
+      --shadow: 0 12px 34px rgba(23, 32, 51, .2);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        color-scheme: dark;
+        --card: rgba(24, 32, 45, .97);
+        --card-solid: #18202d;
+        --text: #f6f7fb;
+        --muted: #a9b3c3;
+        --line: rgba(246, 247, 251, .18);
+        --warn-soft: rgba(245, 158, 11, .2);
+        --ok: rgba(34, 197, 94, .18);
+        --shadow: 0 12px 34px rgba(0, 0, 0, .42);
+      }
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    html {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      overscroll-behavior: none;
+      touch-action: none;
+      color: var(--text);
+      background: #dbe8df;
+    }
+
+    body {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      overscroll-behavior: none;
+      touch-action: none;
+      color: var(--text);
+      background: #dbe8df;
+    }
+
+    button,
+    a { font: inherit; }
+
+    .app {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    #map {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      background: #dbe8df;
+      touch-action: none;
+    }
+
+    @supports (height: 100dvh) {
+      html,
+      body,
+      .app,
+      #map { height: 100dvh; }
+    }
+
+    .leaflet-container,
+    .leaflet-pane,
+    .leaflet-map-pane,
+    .leaflet-tile-pane,
+    .leaflet-overlay-pane,
+    .leaflet-route-pane,
+    .leaflet-marker-pane,
+    .leaflet-control-container {
+      touch-action: none;
+    }
+
+    .leaflet-route-pane {
+      z-index: 430;
+    }
+
+    .leaflet-control-zoom {
+      display: none;
+    }
+
+    .leaflet-popup-content-wrapper {
+      border-radius: 14px;
+    }
+
+    .leaflet-popup-content {
+      min-width: 190px;
+      margin: 12px;
+      line-height: 1.35;
+      font-size: 13px;
+    }
+
+    .leaflet-popup-content b {
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .popup-share {
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      margin: 7px 0 0 auto;
+      padding: 0;
+      border: 1px solid rgba(23, 32, 51, .12);
+      border-radius: 999px;
+      background: #f1f3f4;
+      color: #1a73e8;
+      box-shadow: 0 1px 3px rgba(23, 32, 51, .12);
+    }
+
+    .popup-share svg {
+      width: 18px;
+      height: 18px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .popup-share.copied {
+      background: #dff4df;
+      color: #187a35;
+    }
+
+    .pin {
+      width: 28px;
+      height: 28px;
+      display: grid;
+      place-items: center;
+      border: 2px solid #fff;
+      border-radius: 999px;
+      box-shadow: 0 2px 9px rgba(23, 32, 51, .28);
+      color: #fff;
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .pin.camp { background: var(--camp); }
+    .pin.hotel { background: var(--hotel); }
+    .pin.activity { background: var(--activity); }
+    .pin.charge { background: var(--charge); color: #1f2937; }
+    .pin.ferry { background: var(--ferry); }
+    .pin.home { background: #1f6f54; }
+    .pin.warn { background: #d73320; }
+
+    .model-y-pin {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 9px;
+      border: 2px solid rgba(255, 255, 255, .75);
+      border-radius: 999px;
+      background: var(--primary);
+      color: var(--primary-text);
+      box-shadow: var(--shadow);
+      font-size: 12px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .bottom-strip {
+      position: absolute;
+      left: calc(env(safe-area-inset-left) + 44px);
+      right: calc(env(safe-area-inset-right) + 10px);
+      z-index: 4;
+      display: grid;
+      gap: 8px;
+      pointer-events: none;
+    }
+
+    .bottom-strip {
+      bottom: calc(env(safe-area-inset-bottom) + 12px);
+    }
+
+    .pill,
+    .summary {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-width: 0;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .82);
+      color: #172033;
+      box-shadow: 0 3px 14px rgba(23, 32, 51, .08);
+      backdrop-filter: blur(12px);
+    }
+
+    .pill {
+      width: fit-content;
+      max-width: 100%;
+      padding: 8px 10px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .summary {
+      justify-content: space-between;
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 18px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .summary small,
+    .muted {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .map-tools {
+      position: absolute;
+      right: calc(env(safe-area-inset-right) + 12px);
+      bottom: calc(env(safe-area-inset-bottom) + 116px);
+      z-index: 4;
+      display: flex;
+      flex-direction: row;
+      gap: 8px;
+    }
+
+    .load-status {
+      position: absolute;
+      top: calc(env(safe-area-inset-top) + 104px);
+      left: 50%;
+      z-index: 7;
+      transform: translateX(-50%);
+      max-width: min(86vw, 320px);
+      padding: 8px 11px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .9);
+      color: #172033;
+      box-shadow: 0 3px 14px rgba(23, 32, 51, .12);
+      font-size: 12px;
+      font-weight: 800;
+      text-align: center;
+      backdrop-filter: blur(12px);
+      pointer-events: none;
+    }
+
+    body.map-ready .load-status {
+      opacity: 0;
+      transform: translateX(-50%) translateY(-8px);
+      transition: opacity .25s ease, transform .25s ease;
+    }
+
+    .map-tool {
+      width: 40px;
+      height: 40px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .84);
+      color: #172033;
+      box-shadow: 0 3px 14px rgba(23, 32, 51, .12);
+      backdrop-filter: blur(12px);
+    }
+
+    .edge-zone {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 5;
+      width: 18px;
+      touch-action: none;
+      background: transparent;
+    }
+
+    .drawer {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 8;
+      width: min(86vw, 340px);
+      display: grid;
+      grid-template-rows: auto 1fr;
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
+      background: var(--card-solid);
+      border-right: 1px solid var(--line);
+      box-shadow: 10px 0 28px rgba(23, 32, 51, .24);
+      transform: translateX(-100%);
+      transition: transform .24s ease;
+      will-change: transform;
+      touch-action: pan-y;
+    }
+
+    .drawer.open { transform: translateX(0); }
+
+    .handle {
+      position: absolute;
+      top: 50%;
+      right: -48px;
+      width: 48px;
+      height: 58px;
+      transform: translateY(-50%);
+      border: 0;
+      border-radius: 0 999px 999px 0;
+      background: var(--card-solid);
+      color: #173b63;
+      box-shadow: 7px 4px 14px rgba(23, 32, 51, .2);
+      touch-action: none;
+    }
+
+    .handle-logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+    }
+
+    .handle-rv {
+      width: 42px;
+      height: 27px;
+      flex: 0 0 auto;
+      overflow: visible;
+      transform-origin: center;
+      transition: transform .24s ease;
+    }
+
+    .drawer.open .handle {
+      right: -48px;
+      width: 48px;
+      height: 58px;
+    }
+
+    .drawer.open .handle-rv { transform: scaleX(-1); }
+
+    .drawer-head {
+      display: grid;
+      gap: 9px;
+      padding: 14px 12px 10px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .drawer-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    h1,
+    h2 {
+      margin: 0;
+      line-height: 1.16;
+    }
+
+    h1 { font-size: 17px; }
+    h2 { font-size: 16px; }
+
+    .close {
+      width: 36px;
+      height: 36px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: transparent;
+      color: var(--text);
+      font-size: 18px;
+    }
+
+    .alert-line {
+      display: grid;
+      gap: 2px;
+      padding: 9px;
+      border: 1px solid rgba(245, 158, 11, .7);
+      border-radius: 14px;
+      background: var(--warn-soft);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .cards {
+      min-height: 0;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      padding: 10px 10px 18px;
+      scroll-padding-top: 10px;
+    }
+
+    .card {
+      display: grid;
+      gap: 9px;
+      margin-bottom: 10px;
+      padding: 11px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--card-solid);
+    }
+
+    .card.today { border: 2px solid var(--primary); }
+    .card.watch { border: 3px solid var(--warn); }
+    .card.selected {
+      outline: 2px solid rgba(15, 95, 215, .32);
+      outline-offset: 2px;
+    }
+
+    .card-top {
+      display: grid;
+      gap: 3px;
+    }
+
+    .chips,
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 5px 8px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(127, 127, 127, .08);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .chip.ok { background: var(--ok); }
+    .chip.watch { background: var(--warn-soft); }
+
+    .action {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 34px;
+      padding: 7px 9px;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      background: rgba(127, 127, 127, .08);
+      color: var(--text);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .action.primary {
+      border-color: var(--primary);
+      background: var(--primary);
+      color: var(--primary-text);
+    }
+
+    .mini-list {
+      display: grid;
+      gap: 6px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .mini-list li {
+      display: grid;
+      grid-template-columns: 18px 1fr;
+      gap: 5px;
+      align-items: start;
+    }
+
+    .fallback {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      display: none;
+      place-items: center;
+      padding: 24px;
+      color: #172033;
+      background: #dbe8df;
+      text-align: center;
+      font-weight: 700;
+    }
+
+    body.map-error .fallback { display: grid; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .drawer { transition: none; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app" aria-label="Travel map with drawer cards">
+    <div id="map" aria-label="完整路线地图"></div>
+    <div class="fallback">真实地图没有加载出来，请检查网络后刷新。</div>
+    <div class="edge-zone" data-edge aria-label="Swipe from left edge to open cards"></div>
+    <div class="load-status" data-load-status>正在加载真实地图…</div>
+
+    <div class="map-tools">
+      <button class="map-tool" type="button" data-fit aria-label="显示完整路线">[&nbsp;]</button>
+      <button class="map-tool" type="button" data-locate aria-label="显示当前位置">📍</button>
+    </div>
+
+    <div class="bottom-strip">
+      <div class="summary"><span data-selected-summary>7/8 · Jasper → Edmonton</span><small>当前卡片</small></div>
+      <div class="summary"><span>实时预警按需加载</span><small>Runtime feed</small></div>
+    </div>
+
+    <aside class="drawer" data-drawer aria-label="Travel card drawer">
+      <button class="handle" type="button" data-handle aria-expanded="false" aria-label="打开 Road Trip 行程卡">
+        <span class="handle-logo" aria-hidden="true">
+          <svg class="handle-rv" viewBox="0 0 84 48" role="img">
+            <path d="M8 12Q9 5 18 5h42q10 0 15 10l4 10v12H5V16q0-4 3-4Z" fill="#f6f0dc" stroke="currentColor" stroke-width="2.4"/>
+            <path d="M5 26h74v11H5Z" fill="#2c7d87"/>
+            <path d="M12 11h18v11H12Zm22 0h18v11H34Zm22 0h8q6 1 9 11H56Z" fill="#8ec6d2" stroke="currentColor" stroke-width="1.7"/>
+            <path d="M56 23h18M42 26v11M8 26h34" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            <path d="M63 26h13v8H63l-6-4Z" fill="#f6f0dc" stroke="currentColor" stroke-width="1.8"/>
+            <circle cx="75" cy="30" r="2.2" fill="#f7cf58" stroke="currentColor" stroke-width="1.3"/>
+            <circle cx="18" cy="37" r="7" fill="#f7cf58" stroke="currentColor" stroke-width="3"/>
+            <circle cx="66" cy="37" r="7" fill="#f7cf58" stroke="currentColor" stroke-width="3"/>
+            <circle cx="18" cy="37" r="2.2" fill="currentColor"/>
+            <circle cx="66" cy="37" r="2.2" fill="currentColor"/>
+          </svg>
+        </span>
+      </button>
+
+      <header class="drawer-head">
+        <div class="drawer-title">
+          <div>
+            <div class="muted">2026 Summer Cross Canada</div>
+            <h1>Road Trip</h1>
+          </div>
+          <button class="close" type="button" data-close aria-label="Close cards">‹</button>
+        </div>
+        <div class="alert-line">
+          <span>天气、山火和道路预警由临时数据源提供</span>
+          <span class="muted">地图上的景点和 watch 点可以点击跳转卡片</span>
+        </div>
+      </header>
+
+      <section class="cards" data-cards aria-label="Scrollable travel cards"></section>
+    </aside>
+  </main>
+
+  <script src="vendor/leaflet/leaflet.js"></script>
+  <script>
+    (function () {
+      // Route anchors only: daily origins/destinations, ferry terminals and required charging stops.
+      // Activity markers belong in `activities` and must not be added to either route array.
+      const outbound = [
+        [43.6532,-79.3832],[46.4917,-80.9930],[46.5219,-84.3461],[46.9700,-84.7000],
+        [47.9925,-84.7740],[48.7553,-86.3447],[48.3620,-88.8000],[48.3809,-89.2477],
+        [49.7670,-94.4890],[49.8951,-97.1384],[49.8485,-99.9501],[50.4452,-104.6189],
+        [50.2851,-107.7972],[50.0405,-110.6765],[49.6562,-110.2922],[50.0405,-110.6765],
+        [51.0447,-114.0719],[51.1784,-115.5708],[51.2990,-116.9680],[50.9981,-118.1957],
+        [50.6745,-120.3273],[50.1120,-120.7940],[49.3800,-121.4410],[49.2827,-123.1207],
+        [49.0070,-123.1300],[48.6890,-123.4100],[48.4610,-123.5580],[49.2339,-124.8055],
+        [49.1530,-125.9060]
+      ];
+
+      const inbound = [
+        [49.1530,-125.9060],[49.2339,-124.8055],[49.1910,-123.9550],[49.3760,-123.2720],
+        [49.7016,-123.1558],[50.1170,-122.9540],[50.6745,-120.3273],[51.2960,-120.1080],
+        [52.8312,-119.2643],[52.8737,-118.0814],[53.5461,-113.4938],[53.2780,-110.0050],
+        [52.7575,-108.2860],[52.1579,-106.6702],[51.2139,-102.4628],[49.8485,-99.9501],
+        [49.8951,-97.1384],[49.7670,-94.4890],[49.7833,-92.8370],[48.3809,-89.2477],
+        [48.7730,-86.6070],[47.9925,-84.7740],[46.5219,-84.3461],[46.1879,-82.9580],
+        [46.2578,-81.7690],[45.9230,-82.2630],[45.5560,-82.0070],[44.9867,-81.2540],
+        [44.3894,-80.5340],[44.3894,-79.6903],[43.6532,-79.3832]
+      ];
+
+      const ferries = [
+        { name:"Tsawwassen → Swartz Bay", dayId:"d7", coords:[[49.0070,-123.1300],[48.6890,-123.4100]], note:"7/3 morning sailing" },
+        { name:"Departure Bay → Horseshoe Bay", dayId:"d10", coords:[[49.1910,-123.9550],[49.3760,-123.2720]], note:"7/6 afternoon sailing" },
+        { name:"South Baymouth → Tobermory", dayId:"d17", coords:[[45.5560,-82.0070],[44.9867,-81.2540]], note:"7/13 ferry crossing" }
+      ];
+
+      const days = [
+        { id:"d0", day:"6/26", title:"Toronto → Pancake Bay", name:"Pancake Bay Provincial Park", type:"camp", pos:[46.9700,-84.7000], distance:"约700 km", drive:"8-8.5h", note:"Lake Superior 北岸开场，Sudbury / Sault Ste. Marie 补电。" },
+        { id:"d1", day:"6/27", title:"Pancake Bay → Sleeping Giant", name:"Sleeping Giant Provincial Park", type:"camp", pos:[48.3620,-88.8000], distance:"650-700 km", drive:"7.5-8.5h", note:"北岸湖景最强段，Wawa / Thunder Bay 补电。" },
+        { id:"d2", day:"6/28", title:"Thunder Bay → Winnipeg", name:"Comfort Inn South Winnipeg", type:"hotel", pos:[49.7920,-97.1580], distance:"约700 km", drive:"7.5-8h", note:"酒店恢复点：洗衣、补给、睡整觉。" },
+        { id:"d3", day:"6/29", title:"Winnipeg → Cypress Hills", name:"Cypress Hills / Elkwater D-41", type:"camp", pos:[49.6562,-110.2922], distance:"920-970 km", drive:"9.5-10.5h", note:"长草原日，Medicine Hat 补足再进营地。" },
+        { id:"d4", day:"6/30", title:"Cypress Hills → Bow River", name:"Bow River Campground Site 11", type:"camp", pos:[51.0606,-115.3179], distance:"500-550 km", drive:"5-6h", note:"落基山入口营地，Kananaskis pass 需要另买。" },
+        { id:"d5", day:"7/1", title:"Bow River → Kamloops", name:"Quality Inn Kamloops", type:"hotel", pos:[50.6518,-120.3719], distance:"500-540 km", drive:"6.5-7h", note:"Canada Day：Golden Skybridge、Giant Cedars、Columbia Lookout。" },
+        { id:"d6", day:"7/2", title:"Kamloops → Steveston", name:"Steveston Waterfront Hotel", type:"hotel", pos:[49.1250,-123.1830], distance:"390-430 km", drive:"4.5-5h", note:"第二天 Tsawwassen ferry，酒店到码头约半小时。" },
+        { id:"d7", day:"7/3", title:"Steveston → Pedder Bay", name:"Pedder Bay RV Resort", type:"camp", pos:[48.3360,-123.5480], distance:"110-150 km + ferry", drive:"4-5h 含上船", note:"Tsawwassen 10:00 ferry；下午 East Sooke / Pedder Bay。" },
+        { id:"d8", day:"7/4", title:"Pedder Bay → Botanical Beach", name:"Botanical Beach day", type:"camp", pos:[48.3740,-123.7276], distance:"220-260 km", drive:"4-5h", note:"低潮前后赶海，只观察 tide pools。" },
+        { id:"d9", day:"7/5", title:"Pedder Bay → Ucluelet", name:"Ucluelet Campground", type:"camp", pos:[49.1530,-125.9060], distance:"300-340 km", drive:"4.5-5.5h", note:"Cathedral Grove、Long Beach、Wild Pacific Trail。" },
+        { id:"d10", day:"7/6", title:"Ucluelet → Whistler", name:"Pinnacle Hotel Whistler Village", type:"hotel", pos:[50.1157,-122.9573], distance:"330-370 km + ferry", drive:"7-8h 含上船", note:"Departure Bay 13:20 ferry，晚上 Whistler。" },
+        { id:"d11", day:"7/7", title:"Whistler → Jasper", name:"Whistlers Campground", type:"camp", pos:[52.8520,-118.0830], distance:"780-820 km", drive:"9-10h", note:"Mount Robson / Jasper 进场日。" },
+        { id:"d12", day:"7/8", title:"Jasper → Edmonton", name:"Argyll Plaza Hotel Edmonton", type:"hotel", pos:[53.5020,-113.4910], distance:"360-410 km", drive:"4-4.5h", note:"Athabasca Falls 短停；Edmonton 酒店修整。", today:true },
+        { id:"d13", day:"7/9", title:"Edmonton → Pike Lake", name:"Pike Lake Provincial Park", type:"camp", pos:[52.1579,-106.6702], distance:"520-560 km", drive:"5.5-6h", note:"Vegreville Pysanka；USask Museum of Natural Sciences。" },
+        { id:"d14", day:"7/10", title:"Saskatoon → Winnipeg", name:"Humphry Inn & Suites Winnipeg", type:"hotel", pos:[49.8948,-97.1366], distance:"约780 km", drive:"8-8.5h", note:"可选南线绕 Reed Lake Scenic View。" },
+        { id:"d15", day:"7/11", title:"Winnipeg → Neys", name:"Neys Provincial Park", type:"camp", pos:[48.7730,-86.6070], distance:"980-1030 km", drive:"10.5-11.5h", note:"Kenora、Kakabeka Falls、Terry Fox Lookout。" },
+        { id:"d16", day:"7/12", title:"Neys → South Baymouth", name:"Buckhorn Motel", type:"hotel", pos:[45.5745,-82.0143], distance:"700-760 km", drive:"8.5-9.5h", note:"为 7/13 Chi-Cheemaun ferry 做准备。" },
+        { id:"d17", day:"7/13", title:"South Baymouth → Toronto", name:"Chi-Cheemaun / Tobermory / Toronto", type:"home", pos:[43.6532,-79.3832], distance:"约300 km + ferry", drive:"4-5h 含上船", note:"South Baymouth → Tobermory ferry，最后回 GTA。" }
+      ];
+
+      const activities = [
+        ["Nokomis / Orphan Lake Trails", [47.3360,-84.7900], "d0", "Lake Superior PP 中等短徒步"],
+        ["Sea Lion Trail", [48.3330,-88.8250], "d1", "Sleeping Giant 经典短线"],
+        ["Golden Skybridge", [51.3020,-116.9570], "d5", "Canada Day 重点 stop"],
+        ["Giant Cedars Boardwalk", [51.2370,-118.1440], "d5", "时间够再走的古树木栈道"],
+        ["Columbia Lookout", [50.6740,-120.3600], "d5", "Kamloops 城市/河谷观景"],
+        ["East Sooke Coast Trail", [48.3290,-123.7010], "d7", "南岛海岸短线"],
+        ["Botanical Beach tide pools", [48.5320,-124.4230], "d8", "低潮赶海核心点"],
+        ["Long Beach / Rainforest Trail", [49.0510,-125.6880], "d9", "Pacific Rim 核心"],
+        ["Wild Pacific Trail", [48.9410,-125.5460], "d9", "Ucluelet 海岸线"],
+        ["Mount Robson Viewpoint", [52.8490,-118.5860], "d11", "Jasper 前短停"],
+        ["Athabasca Falls", [52.6640,-117.8840], "d12", "Jasper → Edmonton 短停"],
+        ["USask Museum of Natural Sciences", [52.1320,-106.6320], "d13", "Saskatoon 化石/自然史"],
+        ["Reed Lake Scenic View", [50.4160,-107.0500], "d14", "可选南线补看"],
+        ["Providence Bay Beach", [45.6750,-82.2670], "d16", "Manitoulin 晚上海滩"],
+        ["Chi-Cheemaun ferry deck", [45.2500,-81.6300], "d17", "收尾仪式感"]
+      ];
+
+      const chargers = [
+        ["Sudbury", [46.4917,-80.9930], "d0"], ["Sault Ste. Marie", [46.5219,-84.3461], "d0"],
+        ["Wawa", [47.9930,-84.7730], "d1"], ["Thunder Bay", [48.3809,-89.2477], "d1"],
+        ["Kenora", [49.7670,-94.4890], "d2"], ["Winnipeg", [49.8951,-97.1384], "d2"],
+        ["Regina", [50.4452,-104.6189], "d3"], ["Medicine Hat", [50.0405,-110.6765], "d3"],
+        ["Canmore", [51.0890,-115.3590], "d4"], ["Golden", [51.2961,-116.9631], "d5"],
+        ["Revelstoke", [50.9981,-118.1957], "d5"], ["Kamloops", [50.6745,-120.3273], "d5"],
+        ["Victoria / Langford", [48.4284,-123.3656], "d7"], ["Nanaimo", [49.1659,-123.9401], "d10"],
+        ["Port Alberni", [49.2339,-124.8055], "d9"], ["Squamish / Whistler", [49.7016,-123.1558], "d10"],
+        ["Valemount", [52.8312,-119.2643], "d11"], ["Edmonton", [53.5461,-113.4938], "d12"],
+        ["North Battleford", [52.7575,-108.2861], "d13"], ["Brandon", [49.8485,-99.9501], "d14"]
+      ];
+
+      const wildfireWatch = [];
+
+      const drawer = document.querySelector("[data-drawer]");
+      const cardsEl = document.querySelector("[data-cards]");
+      const handle = document.querySelector("[data-handle]");
+      const closeButton = document.querySelector("[data-close]");
+      const edgeZone = document.querySelector("[data-edge]");
+      const selectedSummary = document.querySelector("[data-selected-summary]");
+      const loadStatus = document.querySelector("[data-load-status]");
+      let map;
+      let baseTiles;
+      let chargerLayer;
+      let activityLayer;
+      let wildfireLayer;
+      let routeLayer;
+      let roadRouteLayer;
+      let edgeStart = null;
+      let drawerStart = null;
+      let mapHasUserMoved = false;
+      const straightRouteLines = [];
+      const markerByDay = new Map();
+      const todayDay = days.find(d => d.today) || days[0];
+
+      function openDrawer(day) {
+        drawer.classList.add("open");
+        handle.setAttribute("aria-expanded", "true");
+        handle.setAttribute("aria-label", "关闭 Road Trip 行程卡");
+        requestAnimationFrame(() => selectDay(day || todayDay, false));
+      }
+
+      function closeDrawer() {
+        drawer.classList.remove("open");
+        handle.setAttribute("aria-expanded", "false");
+        handle.setAttribute("aria-label", "打开 Road Trip 行程卡");
+      }
+
+      function selectDay(day, pan = true, openPopup = false) {
+        if (!day) return;
+        document.querySelectorAll(".card").forEach(card => card.classList.toggle("selected", card.dataset.dayId === day.id));
+        const card = document.querySelector(`[data-day-id="${day.id}"]`);
+        if (card) {
+          const cardTop = card.offsetTop - cardsEl.offsetTop;
+          cardsEl.scrollTo({ top: Math.max(0, cardTop - 10), behavior: "smooth" });
+        }
+        selectedSummary.textContent = `${day.day} · ${day.title}`;
+        if (pan && map) map.setView(day.pos, Math.max(map.getZoom(), 8), { animate: true });
+        const marker = markerByDay.get(day.id);
+        if (marker && openPopup) marker.openPopup();
+      }
+
+      function iconFor(type, extraClass = "") {
+        const symbol = type === "camp" ? "🏕" : type === "hotel" ? "🏨" : type === "charge" ? "T" : type === "activity" ? "📍" : type === "ferry" ? "⛴" : type === "warn" ? "🔥" : "🏠";
+        return L.divIcon({
+          className: "",
+          html: `<div class="pin ${type} ${extraClass}">${symbol}</div>`,
+          iconSize: [28, 28],
+          iconAnchor: [14, 14],
+          popupAnchor: [0, -16]
+        });
+      }
+
+      function popupHtml(title, note, dayId, pos) {
+        const day = days.find(d => d.id === dayId);
+        const dayLine = day ? `${day.day} · ${day.title}` : "";
+        const shareTitle = encodeURIComponent(title);
+        const shareText = encodeURIComponent(dayLine || note || "Road Trip location");
+        const shareUrl = encodeURIComponent(`https://www.google.com/maps/search/?api=1&query=${pos[0]},${pos[1]}`);
+        return `<b>${title}</b>${dayLine}<br>${note || ""}<button class="popup-share" type="button" aria-label="分享位置" title="分享位置" data-share-title="${shareTitle}" data-share-text="${shareText}" data-share-url="${shareUrl}"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="2.5"></circle><circle cx="6" cy="12" r="2.5"></circle><circle cx="18" cy="19" r="2.5"></circle><path d="m8.2 10.8 7.6-4.5M8.2 13.2l7.6 4.5"></path></svg></button>`;
+      }
+
+      function marker(item) {
+        return L.marker(item.pos, { icon: iconFor(item.type, item.extraClass || "") })
+          .bindPopup(popupHtml(item.name, item.note, item.dayId, item.pos), { autoPan: false, keepInView: false });
+      }
+
+      function renderCards() {
+        cardsEl.innerHTML = days.map(day => `
+          <article class="card ${day.today ? "today" : ""}" data-day-id="${day.id}">
+            <div class="card-top">
+              <span class="muted">${day.today ? "Demo today · " : ""}${day.day}</span>
+              <h2>${day.title}</h2>
+              <span class="muted">${day.name}</span>
+            </div>
+            <div class="chips">
+              <span class="chip">🧭 ${day.distance}</span>
+              <span class="chip">⏱ ${day.drive}</span>
+            </div>
+            <div class="actions">
+              <a class="action primary" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(day.name + " Canada")}" target="_blank" rel="noopener">导航</a>
+              <button class="action" type="button" data-show-map="${day.id}">地图</button>
+            </div>
+            <ul class="mini-list">
+              <li><span>${day.type === "camp" ? "🏕" : day.type === "hotel" ? "🏨" : "🏠"}</span><span>${day.note}</span></li>
+            </ul>
+          </article>
+        `).join("");
+
+        cardsEl.querySelectorAll(".card").forEach(card => {
+          card.addEventListener("click", event => {
+            if (event.target.closest("a, button")) return;
+            const day = days.find(d => d.id === card.dataset.dayId);
+            selectDay(day, true, false);
+          });
+        });
+
+        cardsEl.querySelectorAll("[data-show-map]").forEach(button => {
+          button.addEventListener("click", () => {
+            const day = days.find(d => d.id === button.dataset.showMap);
+            selectDay(day, true, false);
+            closeDrawer();
+          });
+        });
+      }
+
+      function fitRoute() {
+        if (!map) return;
+        map.invalidateSize({ pan: false, debounceMoveend: true });
+        const all = [...outbound, ...inbound, ...ferries.flatMap(f => f.coords)];
+        map.fitBounds(L.latLngBounds(all), { padding: [34, 34] });
+      }
+
+      function scheduleInitialMapFit() {
+        [0, 120, 420, 900, 1800].forEach(delay => {
+          window.setTimeout(() => {
+            if (!map || mapHasUserMoved) return;
+            fitRoute();
+          }, delay);
+        });
+      }
+
+      function createResilientTileLayer() {
+        const providers = [
+          {
+            name: "osm",
+            url: ({ z, x, y }) => `https://tile.openstreetmap.org/${z}/${x}/${y}.png`
+          },
+          {
+            name: "carto",
+            url: ({ z, x, y }) => {
+              const subdomain = ["a", "b", "c", "d"][Math.abs(x + y) % 4];
+              return `https://${subdomain}.basemaps.cartocdn.com/light_all/${z}/${x}/${y}.png`;
+            }
+          },
+          {
+            name: "esri",
+            url: ({ z, x, y }) => `https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/${z}/${y}/${x}`
+          }
+        ];
+
+        const ResilientTileLayer = L.GridLayer.extend({
+          createTile(coords, done) {
+            const tile = document.createElement("img");
+            tile.alt = "";
+            tile.setAttribute("role", "presentation");
+            let providerIndex = 0;
+            let requestToken = 0;
+            let timer = 0;
+            let finished = false;
+
+            const finish = error => {
+              if (finished) return;
+              finished = true;
+              window.clearTimeout(timer);
+              tile.onload = null;
+              tile.onerror = null;
+              done(error || null, tile);
+            };
+
+            const tryProvider = () => {
+              if (providerIndex >= providers.length) {
+                window.crossingMapDebug.tileFailures += 1;
+                finish(new Error("All basemap providers failed"));
+                return;
+              }
+
+              const provider = providers[providerIndex];
+              const token = ++requestToken;
+              const fallback = () => {
+                if (finished || token !== requestToken) return;
+                window.clearTimeout(timer);
+                tile.onload = null;
+                tile.onerror = null;
+                providerIndex += 1;
+                window.crossingMapDebug.tileFallbacks += 1;
+                loadStatus.textContent = "正在切换备用底图…";
+                tryProvider();
+              };
+
+              tile.onload = () => {
+                if (finished || token !== requestToken) return;
+                tile.dataset.provider = provider.name;
+                window.crossingMapDebug.tileProviderHits[provider.name] += 1;
+                finish();
+              };
+              tile.onerror = fallback;
+              timer = window.setTimeout(fallback, 4500);
+              tile.src = provider.url(coords);
+            };
+
+            tryProvider();
+            return tile;
+          }
+        });
+
+        return new ResilientTileLayer({
+          minZoom: 2,
+          maxZoom: 19,
+          updateWhenIdle: false,
+          updateWhenZooming: false,
+          keepBuffer: 3,
+          attribution: "&copy; OpenStreetMap contributors &copy; CARTO &copy; Esri"
+        });
+      }
+
+      function refreshFullMap() {
+        if (!map) return;
+        map.stop();
+        map.invalidateSize({ pan: false, debounceMoveend: false });
+        baseTiles?.redraw();
+        fitRoute();
+        window.setTimeout(() => {
+          if (!map) return;
+          map.invalidateSize({ pan: false, debounceMoveend: false });
+          baseTiles?.redraw();
+          fitRoute();
+        }, 160);
+      }
+
+      function decodePolyline(encoded, precision = 6) {
+        const factor = 10 ** precision;
+        const coords = [];
+        let index = 0;
+        let lat = 0;
+        let lon = 0;
+
+        while (index < encoded.length) {
+          let byte = 0;
+          let shift = 0;
+          let result = 0;
+          do {
+            byte = encoded.charCodeAt(index++) - 63;
+            result |= (byte & 0x1f) << shift;
+            shift += 5;
+          } while (byte >= 0x20);
+          lat += (result & 1) ? ~(result >> 1) : result >> 1;
+
+          shift = 0;
+          result = 0;
+          do {
+            byte = encoded.charCodeAt(index++) - 63;
+            result |= (byte & 0x1f) << shift;
+            shift += 5;
+          } while (byte >= 0x20);
+          lon += (result & 1) ? ~(result >> 1) : result >> 1;
+
+          coords.push([lat / factor, lon / factor]);
+        }
+        return coords;
+      }
+
+      async function loadRoadRoutes(routeRenderer) {
+        try {
+          window.crossingMapDebug.roadStage = "loading";
+          const response = await fetch("data/road-routes.json", { cache: "no-store" });
+          if (!response.ok) throw new Error(`road routes ${response.status}`);
+          const data = await response.json();
+          const segments = Array.isArray(data?.segments) ? data.segments : [];
+          if (!segments.length) throw new Error("road routes empty");
+
+          roadRouteLayer = L.layerGroup().addTo(map);
+          segments.forEach(segment => {
+            const coords = decodePolyline(segment.geometry, 6);
+            L.polyline(coords, {
+              color: "#ffffff",
+              weight: 9,
+              opacity: .88,
+              lineCap: "round",
+              lineJoin: "round",
+              smoothFactor: 1,
+              pane: "routePane",
+              renderer: routeRenderer
+            }).addTo(roadRouteLayer);
+            L.polyline(coords, {
+              color: segment.color,
+              weight: 5.5,
+              opacity: .98,
+              lineCap: "round",
+              lineJoin: "round",
+              smoothFactor: 1,
+              pane: "routePane",
+              renderer: routeRenderer
+            }).addTo(roadRouteLayer);
+          });
+
+          straightRouteLines.forEach(line => line.setStyle({ opacity: .12, weight: 3 }));
+          window.crossingMapDebug.roadStage = "ready";
+          window.crossingMapDebug.roadSegments = segments.length;
+          if (!mapHasUserMoved) fitRoute();
+        } catch (error) {
+          window.crossingMapDebug.roadStage = "fallback";
+          window.crossingMapDebug.roadError = String(error);
+        }
+      }
+
+      function initMap() {
+        if (!window.L) {
+          document.body.classList.add("map-error");
+          loadStatus.textContent = "地图脚本没有加载成功，请刷新";
+          return;
+        }
+
+        map = L.map("map", {
+          center: [50.2, -103.5],
+          zoom: 3,
+          zoomControl: false,
+          attributionControl: true,
+          preferCanvas: false,
+          tap: true,
+          dragging: true,
+          touchZoom: true,
+          doubleClickZoom: true,
+          boxZoom: false,
+          keyboard: false
+        });
+
+        map.dragging?.enable();
+        map.touchZoom?.enable();
+        map.doubleClickZoom?.enable();
+
+        map.createPane("routePane");
+        map.getPane("routePane").classList.add("leaflet-route-pane");
+        const routeRenderer = L.svg({ pane: "routePane", padding: .5 });
+        window.crossingMapDebug = {
+          roadStage: "not-started",
+          roadSegments: 0,
+          tileFallbacks: 0,
+          tileFailures: 0,
+          tileProviderHits: { osm: 0, carto: 0, esri: 0 }
+        };
+
+        baseTiles = createResilientTileLayer()
+          .once("load", () => {
+            document.body.classList.add("map-ready");
+            loadStatus.textContent = "地图已加载";
+            if (!mapHasUserMoved) requestAnimationFrame(fitRoute);
+          })
+          .on("tileerror", () => {
+            loadStatus.textContent = "底图瓦片加载较慢，路线和点位仍可用";
+          })
+          .addTo(map);
+
+        routeLayer = L.layerGroup().addTo(map);
+        straightRouteLines.push(
+          L.polyline(outbound, { color: "#ffffff", weight: 11, opacity: .82, pane: "routePane", renderer: routeRenderer }).addTo(routeLayer),
+          L.polyline(outbound, { color: "#1769d1", weight: 7, opacity: .98, pane: "routePane", renderer: routeRenderer }).addTo(routeLayer),
+          L.polyline(inbound, { color: "#ffffff", weight: 11, opacity: .82, pane: "routePane", renderer: routeRenderer }).addTo(routeLayer),
+          L.polyline(inbound, { color: "#d46a1f", weight: 7, opacity: .98, pane: "routePane", renderer: routeRenderer }).addTo(routeLayer)
+        );
+        ferries.forEach(ferry => {
+          L.polyline(ferry.coords, { color: "#7c3aed", weight: 5, opacity: .98, dashArray: "8 8", pane: "routePane", renderer: routeRenderer }).addTo(routeLayer);
+          marker({ name:ferry.name, type:"ferry", pos:ferry.coords[0], dayId:ferry.dayId, note:ferry.note }).addTo(map);
+        });
+
+        marker({ name:"Toronto", type:"home", pos:[43.6532,-79.3832], dayId:"d0", note:"起点 / 终点" }).addTo(map);
+
+        days.forEach(day => {
+          const m = marker({ name:day.name, type:day.type, pos:day.pos, dayId:day.id, note:`${day.day} · ${day.title}<br>${day.distance} · ${day.drive}` }).addTo(map);
+          markerByDay.set(day.id, m);
+        });
+
+        activityLayer = L.layerGroup();
+        activities.forEach(([name, pos, dayId, note]) => marker({ name, pos, dayId, note, type:"activity" }).addTo(activityLayer));
+
+        chargerLayer = L.layerGroup();
+        chargers.forEach(([name, pos, dayId]) => marker({ name, pos, dayId, note:"Tesla / 快充锚点，最终以车机实时状态为准。", type:"charge" }).addTo(chargerLayer));
+
+        wildfireLayer = L.layerGroup().addTo(map);
+        wildfireWatch.forEach(([name, pos, dayId]) => marker({ name, pos, dayId, note:"山火 / 烟雾 watch 点，出发前复核官方地图和道路状态。", type:"warn", extraClass:"warn" }).addTo(wildfireLayer));
+
+        L.marker([43.6532,-79.3832], {
+          icon: L.divIcon({
+            className: "",
+            html: '<div class="model-y-pin">🚙 Model Y</div>',
+            iconSize: [82, 30],
+              iconAnchor: [41, 15]
+          })
+        }).bindPopup(popupHtml("Model Y", "示例当前位置", todayDay.id, [43.6532,-79.3832]), { autoPan: false, keepInView: false }).addTo(map);
+
+        const syncDetailLayers = () => {
+          if (map.getZoom() >= 4) {
+            if (!map.hasLayer(activityLayer)) activityLayer.addTo(map);
+          } else if (map.hasLayer(activityLayer)) {
+            map.removeLayer(activityLayer);
+          }
+        };
+        map.on("zoomend", syncDetailLayers);
+        map.on("dragstart zoomstart", event => {
+          if (event.originalEvent) mapHasUserMoved = true;
+        });
+
+        map.whenReady(() => {
+          loadStatus.textContent = "路线已显示，底图加载中…";
+          requestAnimationFrame(() => {
+            map.invalidateSize(false);
+            selectDay(todayDay, false);
+            syncDetailLayers();
+            loadRoadRoutes(routeRenderer);
+            scheduleInitialMapFit();
+          });
+        });
+      }
+
+      try {
+        renderCards();
+        initMap();
+      } catch (error) {
+        document.body.classList.add("map-error");
+        loadStatus.textContent = "地图初始化失败：" + error.message;
+      }
+
+      document.querySelector("#map").addEventListener("click", async event => {
+        const button = event.target.closest(".popup-share");
+        if (!button) return;
+        event.preventDefault();
+        event.stopPropagation();
+
+        const title = decodeURIComponent(button.dataset.shareTitle || "Road Trip location");
+        const text = decodeURIComponent(button.dataset.shareText || "Road Trip location");
+        const url = decodeURIComponent(button.dataset.shareUrl || "");
+        const showCopiedState = () => {
+          button.classList.add("copied");
+          button.setAttribute("aria-label", "位置链接已复制");
+          window.setTimeout(() => {
+            button.classList.remove("copied");
+            button.setAttribute("aria-label", "分享位置");
+          }, 1600);
+        };
+
+        try {
+          if (navigator.share) {
+            await navigator.share({ title, text, url });
+          } else if (navigator.clipboard?.writeText) {
+            await navigator.clipboard.writeText(`${title}\n${url}`);
+            showCopiedState();
+          } else {
+            window.open(url, "_blank", "noopener");
+          }
+        } catch (error) {
+          if (error?.name === "AbortError") return;
+          try {
+            await navigator.clipboard?.writeText(`${title}\n${url}`);
+            showCopiedState();
+          } catch {
+            window.open(url, "_blank", "noopener");
+          }
+        }
+      });
+
+      handle.addEventListener("click", () => {
+        if (drawer.classList.contains("open")) closeDrawer();
+        else openDrawer(todayDay);
+      });
+
+      closeButton.addEventListener("click", closeDrawer);
+
+      edgeZone.addEventListener("pointerdown", event => {
+        edgeStart = { x:event.clientX, y:event.clientY };
+        edgeZone.setPointerCapture(event.pointerId);
+      });
+
+      edgeZone.addEventListener("pointerup", event => {
+        if (!edgeStart) return;
+        const dx = event.clientX - edgeStart.x;
+        const dy = event.clientY - edgeStart.y;
+        if (dx > 42 && Math.abs(dx) > Math.abs(dy) * 1.2) openDrawer(todayDay);
+        edgeStart = null;
+      });
+
+      drawer.addEventListener("pointerdown", event => {
+        if (!drawer.classList.contains("open")) return;
+        drawerStart = { x:event.clientX, y:event.clientY };
+      });
+
+      drawer.addEventListener("pointerup", event => {
+        if (!drawerStart) return;
+        const dx = event.clientX - drawerStart.x;
+        const dy = event.clientY - drawerStart.y;
+        if (dx < -52 && Math.abs(dx) > Math.abs(dy) * 1.4) closeDrawer();
+        drawerStart = null;
+      });
+
+      document.querySelector("[data-fit]").addEventListener("click", refreshFullMap);
+
+      document.querySelector("[data-locate]").addEventListener("click", () => {
+        if (!navigator.geolocation || !map) return;
+        navigator.geolocation.getCurrentPosition(position => {
+          const pos = [position.coords.latitude, position.coords.longitude];
+          map.setView(pos, 11, { animate: true });
+          L.circle(pos, { radius: position.coords.accuracy || 80, color: "#0f5fd7", fillColor: "#0f5fd7", fillOpacity: .12 }).addTo(map);
+        });
+      });
+
+      let resizeFrame = 0;
+      const refreshMapViewport = () => {
+        cancelAnimationFrame(resizeFrame);
+        resizeFrame = requestAnimationFrame(() => {
+          if (!map) return;
+          map.invalidateSize({ pan: false, debounceMoveend: true });
+          if (!mapHasUserMoved) fitRoute();
+        });
+      };
+      window.addEventListener("resize", refreshMapViewport);
+      window.addEventListener("pageshow", refreshMapViewport);
+      window.addEventListener("load", refreshMapViewport);
+      window.visualViewport?.addEventListener("resize", refreshMapViewport);
+    })();
+  </script>
+</body>
+</html>

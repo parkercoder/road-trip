@@ -1,0 +1,14 @@
+.DS_Store
+node_modules/
+*.log
+.env
+.env.*
+!.env.example
+
+# Never publish trip confirmations or private exports.
+*confirmation*
+*reservation*
+*invoice*
+*booking*
+*.pdf
+private/

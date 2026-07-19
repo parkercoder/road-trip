@@ -1,0 +1,188 @@
+{
+  "schemaVersion": "1.0",
+  "trip": {
+    "id": "lakes-and-pines-weekend",
+    "title": "Lakes and Pines Weekend",
+    "summary": "A fictional three-day family road trip from Toronto to Algonquin and Huntsville.",
+    "locale": "en-CA",
+    "timezone": "America/Toronto",
+    "startDate": "2025-09-12",
+    "endDate": "2025-09-14",
+    "originPlaceId": "toronto",
+    "destinationPlaceId": "toronto",
+    "roundTrip": true,
+    "status": "completed",
+    "sourceBrief": "Plan a three-day family road trip from Toronto with short driving days, one powered campsite, moderate hiking, and a hotel on the second night."
+  },
+  "travelers": {
+    "adults": 2,
+    "children": [
+      { "age": 9, "mobility": "standard" },
+      { "age": 12, "mobility": "standard" }
+    ],
+    "accessibilityNeeds": []
+  },
+  "vehicle": {
+    "mode": "car",
+    "fuelType": "electric",
+    "practicalRangeKm": 380,
+    "chargingConnectors": ["NACS"]
+  },
+  "preferences": {
+    "driving": {
+      "targetHoursPerDay": 3,
+      "maximumHoursPerDay": 5,
+      "restEveryMinutes": 120
+    },
+    "route": {
+      "avoidCountries": ["US"],
+      "avoidTolls": false,
+      "avoidFerries": false,
+      "preferScenicRoads": true,
+      "avoidRepeatingRoads": false
+    },
+    "lodging": {
+      "preferredTypes": ["campground", "hotel"],
+      "hotelEveryDays": 2,
+      "nightlyBudget": {
+        "amount": 180,
+        "currency": "CAD"
+      },
+      "requiredAmenities": [],
+      "preferredAmenities": ["electric-site", "parking", "breakfast"]
+    },
+    "activities": {
+      "interests": ["hiking", "lookouts", "wildlife"],
+      "hikingDifficulty": "moderate",
+      "maximumHikeHours": 4
+    },
+    "alerts": {
+      "weather": true,
+      "wildfire": true,
+      "roadClosures": true,
+      "airQuality": true
+    }
+  },
+  "places": [
+    {
+      "id": "toronto",
+      "name": "Toronto",
+      "kind": "home",
+      "location": {
+        "coordinates": { "lat": 43.6532, "lng": -79.3832 }
+      },
+      "tags": ["origin", "destination"]
+    },
+    {
+      "id": "huntsville-charge",
+      "name": "Huntsville charging stop",
+      "kind": "charging",
+      "location": {
+        "coordinates": { "lat": 45.3269, "lng": -79.2168 }
+      },
+      "tags": ["required-route-anchor"]
+    },
+    {
+      "id": "algonquin-camp",
+      "name": "Algonquin area campground",
+      "kind": "campground",
+      "location": {
+        "coordinates": { "lat": 45.5369, "lng": -78.2654 }
+      },
+      "tags": ["overnight", "electric-site"]
+    },
+    {
+      "id": "centennial-ridges",
+      "name": "Centennial Ridges Trail",
+      "kind": "trailhead",
+      "location": {
+        "coordinates": { "lat": 45.5599, "lng": -78.4437 }
+      },
+      "tags": ["hiking", "lookout"]
+    },
+    {
+      "id": "huntsville-hotel",
+      "name": "Huntsville hotel",
+      "kind": "hotel",
+      "location": {
+        "coordinates": { "lat": 45.3269, "lng": -79.2168 }
+      },
+      "tags": ["overnight"]
+    }
+  ],
+  "days": [
+    {
+      "id": "day-1",
+      "date": "2025-09-12",
+      "title": "Toronto to Algonquin",
+      "originPlaceId": "toronto",
+      "destinationPlaceId": "algonquin-camp",
+      "route": {
+        "anchorPlaceIds": ["toronto", "huntsville-charge", "algonquin-camp"],
+        "optionalStopPlaceIds": [],
+        "distanceKm": 310,
+        "driveMinutes": 225
+      },
+      "stay": {
+        "placeId": "algonquin-camp",
+        "type": "campground",
+        "status": "completed",
+        "amenities": ["electric-site"]
+      },
+      "activities": [],
+      "notes": ["Charge in Huntsville before entering the park corridor."]
+    },
+    {
+      "id": "day-2",
+      "date": "2025-09-13",
+      "title": "Algonquin to Huntsville",
+      "originPlaceId": "algonquin-camp",
+      "destinationPlaceId": "huntsville-hotel",
+      "route": {
+        "anchorPlaceIds": ["algonquin-camp", "huntsville-hotel"],
+        "optionalStopPlaceIds": ["centennial-ridges"],
+        "distanceKm": 145,
+        "driveMinutes": 125
+      },
+      "stay": {
+        "placeId": "huntsville-hotel",
+        "type": "hotel",
+        "status": "completed",
+        "amenities": ["parking", "breakfast"]
+      },
+      "activities": [
+        {
+          "placeId": "centennial-ridges",
+          "priority": "preferred",
+          "durationMinutes": 240,
+          "notes": "Skip when trail conditions or family energy make the hike unsuitable."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "id": "day-3",
+      "date": "2025-09-14",
+      "title": "Huntsville to Toronto",
+      "originPlaceId": "huntsville-hotel",
+      "destinationPlaceId": "toronto",
+      "route": {
+        "anchorPlaceIds": ["huntsville-hotel", "toronto"],
+        "optionalStopPlaceIds": [],
+        "distanceKm": 225,
+        "driveMinutes": 165
+      },
+      "stay": {
+        "placeId": "toronto",
+        "type": "home",
+        "status": "completed",
+        "amenities": []
+      },
+      "activities": [],
+      "notes": []
+    }
+  ],
+  "generated": {
+    "generatorVersion": "0.1.0"
+  }
+}

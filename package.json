@@ -1,0 +1,16 @@
+{
+  "name": "road-trip-map",
+  "version": "0.1.0",
+  "description": "A mobile-first road trip map with a swipeable itinerary drawer.",
+  "license": "MIT",
+  "private": false,
+  "scripts": {
+    "serve": "python3 -m http.server 8766",
+    "build:routes": "node scripts/build-road-routes.mjs",
+    "check:tripspec": "node scripts/check-trip-spec.mjs examples/lakes-and-pines.trip.json",
+    "check:privacy": "node scripts/check-privacy.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

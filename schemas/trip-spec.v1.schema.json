@@ -1,0 +1,556 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://road-trip.dev/schemas/trip-spec.v1.schema.json",
+  "title": "Road Trip TripSpec V1",
+  "description": "Portable, provider-neutral source data for planning and rendering a road trip.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "trip",
+    "travelers",
+    "vehicle",
+    "preferences",
+    "places",
+    "days"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0"
+    },
+    "trip": {
+      "$ref": "#/$defs/trip"
+    },
+    "travelers": {
+      "$ref": "#/$defs/travelers"
+    },
+    "vehicle": {
+      "$ref": "#/$defs/vehicle"
+    },
+    "preferences": {
+      "$ref": "#/$defs/preferences"
+    },
+    "places": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/place"
+      }
+    },
+    "days": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/day"
+      }
+    },
+    "generated": {
+      "$ref": "#/$defs/generated"
+    }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]*$"
+    },
+    "date": {
+      "type": "string",
+      "format": "date"
+    },
+    "time": {
+      "type": "string",
+      "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+    },
+    "money": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["currency"],
+      "properties": {
+        "amount": {
+          "type": "number",
+          "minimum": 0
+        },
+        "currency": {
+          "type": "string",
+          "pattern": "^[A-Z]{3}$"
+        }
+      }
+    },
+    "trip": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "title",
+        "locale",
+        "timezone",
+        "startDate",
+        "endDate",
+        "originPlaceId",
+        "destinationPlaceId"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "summary": {
+          "type": "string",
+          "maxLength": 500
+        },
+        "locale": {
+          "type": "string",
+          "minLength": 2
+        },
+        "timezone": {
+          "type": "string",
+          "minLength": 1
+        },
+        "startDate": {
+          "$ref": "#/$defs/date"
+        },
+        "endDate": {
+          "$ref": "#/$defs/date"
+        },
+        "originPlaceId": {
+          "$ref": "#/$defs/id"
+        },
+        "destinationPlaceId": {
+          "$ref": "#/$defs/id"
+        },
+        "roundTrip": {
+          "type": "boolean",
+          "default": false
+        },
+        "status": {
+          "enum": ["draft", "planned", "active", "completed", "archived"],
+          "default": "draft"
+        },
+        "sourceBrief": {
+          "type": "string",
+          "maxLength": 4000
+        }
+      }
+    },
+    "travelers": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["adults", "children"],
+      "properties": {
+        "adults": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "age": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 17
+              },
+              "mobility": {
+                "enum": ["standard", "limited", "stroller"]
+              }
+            }
+          }
+        },
+        "accessibilityNeeds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "vehicle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode", "fuelType"],
+      "properties": {
+        "mode": {
+          "enum": ["car", "campervan", "rv", "motorcycle"]
+        },
+        "make": {
+          "type": "string"
+        },
+        "model": {
+          "type": "string"
+        },
+        "fuelType": {
+          "enum": ["gasoline", "diesel", "hybrid", "electric"]
+        },
+        "practicalRangeKm": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "chargingConnectors": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "heightM": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "lengthM": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      }
+    },
+    "preferences": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["driving", "route", "lodging", "activities", "alerts"],
+      "properties": {
+        "driving": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["targetHoursPerDay", "maximumHoursPerDay"],
+          "properties": {
+            "targetHoursPerDay": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "maximum": 24
+            },
+            "maximumHoursPerDay": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "maximum": 24
+            },
+            "restEveryMinutes": {
+              "type": "integer",
+              "minimum": 30
+            }
+          }
+        },
+        "route": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "avoidCountries": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Z]{2}$"
+              }
+            },
+            "avoidTolls": {
+              "type": "boolean"
+            },
+            "avoidFerries": {
+              "type": "boolean"
+            },
+            "preferScenicRoads": {
+              "type": "boolean"
+            },
+            "avoidRepeatingRoads": {
+              "type": "boolean"
+            }
+          }
+        },
+        "lodging": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "preferredTypes": {
+              "type": "array",
+              "items": {
+                "enum": ["campground", "rv-park", "hotel", "motel", "cabin", "rental"]
+              }
+            },
+            "hotelEveryDays": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "nightlyBudget": {
+              "$ref": "#/$defs/money"
+            },
+            "requiredAmenities": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "preferredAmenities": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "activities": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "interests": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "hikingDifficulty": {
+              "enum": ["easy", "moderate", "challenging", "any"]
+            },
+            "maximumHikeHours": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 24
+            }
+          }
+        },
+        "alerts": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "weather": {
+              "type": "boolean"
+            },
+            "wildfire": {
+              "type": "boolean"
+            },
+            "roadClosures": {
+              "type": "boolean"
+            },
+            "airQuality": {
+              "type": "boolean"
+            }
+          }
+        }
+      }
+    },
+    "coordinates": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["lat", "lng"],
+      "properties": {
+        "lat": {
+          "type": "number",
+          "minimum": -90,
+          "maximum": 90
+        },
+        "lng": {
+          "type": "number",
+          "minimum": -180,
+          "maximum": 180
+        }
+      }
+    },
+    "place": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name", "kind", "location"],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "enum": [
+            "origin",
+            "destination",
+            "overnight",
+            "campground",
+            "hotel",
+            "charging",
+            "fuel",
+            "ferry-terminal",
+            "attraction",
+            "trailhead",
+            "lookout",
+            "food",
+            "service",
+            "home"
+          ]
+        },
+        "location": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["coordinates"],
+          "properties": {
+            "coordinates": {
+              "$ref": "#/$defs/coordinates"
+            },
+            "address": {
+              "type": "string"
+            },
+            "mapUrl": {
+              "type": "string",
+              "format": "uri"
+            }
+          }
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+    "activity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["placeId", "priority"],
+      "properties": {
+        "placeId": {
+          "$ref": "#/$defs/id"
+        },
+        "priority": {
+          "enum": ["required", "preferred", "optional"]
+        },
+        "startTime": {
+          "$ref": "#/$defs/time"
+        },
+        "durationMinutes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+    "stay": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["placeId", "type"],
+      "properties": {
+        "placeId": {
+          "$ref": "#/$defs/id"
+        },
+        "type": {
+          "enum": ["campground", "rv-park", "hotel", "motel", "cabin", "rental", "home", "none"]
+        },
+        "status": {
+          "enum": ["idea", "selected", "booked", "completed"]
+        },
+        "checkIn": {
+          "$ref": "#/$defs/time"
+        },
+        "checkOut": {
+          "$ref": "#/$defs/time"
+        },
+        "amenities": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+    "day": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "date",
+        "title",
+        "originPlaceId",
+        "destinationPlaceId",
+        "route",
+        "activities"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "date": {
+          "$ref": "#/$defs/date"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "originPlaceId": {
+          "$ref": "#/$defs/id"
+        },
+        "destinationPlaceId": {
+          "$ref": "#/$defs/id"
+        },
+        "route": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["anchorPlaceIds", "optionalStopPlaceIds"],
+          "properties": {
+            "anchorPlaceIds": {
+              "type": "array",
+              "minItems": 2,
+              "items": {
+                "$ref": "#/$defs/id"
+              }
+            },
+            "optionalStopPlaceIds": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/id"
+              }
+            },
+            "distanceKm": {
+              "type": "number",
+              "minimum": 0
+            },
+            "driveMinutes": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "ferryMinutes": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        "stay": {
+          "$ref": "#/$defs/stay"
+        },
+        "activities": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/activity"
+          }
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "generated": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Deterministic planner output that may be rebuilt. Live weather and hazard data never belongs here.",
+      "properties": {
+        "generatedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "generatorVersion": {
+          "type": "string"
+        },
+        "routeDataFile": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}
