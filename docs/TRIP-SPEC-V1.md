@@ -44,6 +44,8 @@ The Traveler may merge these sources in memory, but it must remain usable when r
 
 `optionalStopPlaceIds` and `activities` appear on the map and cards without forcing a detour. The planner may suggest a detour after comparing its cost, but it must not silently promote an optional stop to an anchor.
 
+A ferry crossing is represented by two consecutive `ferry-terminal` anchors. The Traveler draws that pair as a ferry leg, while the road-route generator ends the road segment at the first terminal and resumes at the second.
+
 ## Privacy
 
 TripSpec can include the selected lodging name and useful amenities. It must not include reservation numbers, confirmation links, contact details, payment records, or precise device-location history.

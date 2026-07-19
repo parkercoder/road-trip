@@ -1,0 +1,276 @@
+{
+  "schemaVersion": "1.0",
+  "trip": {
+    "id": "cross-canada-summer-2026",
+    "title": "2026 Summer Cross Canada",
+    "summary": "A public demo itinerary for a round trip from Toronto to Vancouver Island and back.",
+    "locale": "zh-CN",
+    "timezone": "America/Toronto",
+    "startDate": "2026-06-26",
+    "endDate": "2026-07-13",
+    "originPlaceId": "toronto",
+    "destinationPlaceId": "toronto",
+    "roundTrip": true,
+    "status": "completed",
+    "sourceBrief": "Cross-Canada electric road trip with a mix of campgrounds and hotels, required charging anchors, three ferry crossings, and optional outdoor activities."
+  },
+  "travelers": {
+    "adults": 2,
+    "children": [],
+    "accessibilityNeeds": []
+  },
+  "vehicle": {
+    "mode": "car",
+    "make": "Tesla",
+    "model": "Model Y",
+    "fuelType": "electric",
+    "practicalRangeKm": 400,
+    "chargingConnectors": ["NACS"]
+  },
+  "preferences": {
+    "driving": {
+      "targetHoursPerDay": 7,
+      "maximumHoursPerDay": 11.5,
+      "restEveryMinutes": 120
+    },
+    "route": {
+      "avoidCountries": ["US"],
+      "avoidTolls": false,
+      "avoidFerries": false,
+      "preferScenicRoads": true,
+      "avoidRepeatingRoads": false
+    },
+    "lodging": {
+      "preferredTypes": ["campground", "hotel", "motel"],
+      "hotelEveryDays": 3,
+      "requiredAmenities": [],
+      "preferredAmenities": ["parking", "electric-site", "laundry"]
+    },
+    "activities": {
+      "interests": ["hiking", "coastlines", "lookouts", "natural-history"],
+      "hikingDifficulty": "moderate",
+      "maximumHikeHours": 4
+    },
+    "alerts": {
+      "weather": true,
+      "wildfire": true,
+      "roadClosures": true,
+      "airQuality": true
+    }
+  },
+  "places": [
+    { "id": "toronto", "name": "Toronto", "kind": "home", "location": { "coordinates": { "lat": 43.6532, "lng": -79.3832 } }, "tags": ["origin", "destination"] },
+    { "id": "sudbury-charge", "name": "Sudbury", "kind": "charging", "location": { "coordinates": { "lat": 46.4917, "lng": -80.993 } }, "tags": ["required-route-anchor"] },
+    { "id": "sault-charge", "name": "Sault Ste. Marie", "kind": "charging", "location": { "coordinates": { "lat": 46.5219, "lng": -84.3461 } }, "tags": ["required-route-anchor"] },
+    { "id": "pancake-bay", "name": "Pancake Bay Provincial Park", "kind": "campground", "location": { "coordinates": { "lat": 46.97, "lng": -84.7 } }, "tags": ["overnight"] },
+    { "id": "wawa-charge", "name": "Wawa", "kind": "charging", "location": { "coordinates": { "lat": 47.993, "lng": -84.773 } }, "tags": ["required-route-anchor"] },
+    { "id": "white-river", "name": "White River", "kind": "service", "location": { "coordinates": { "lat": 48.7553, "lng": -86.3447 } }, "tags": ["required-route-anchor"] },
+    { "id": "sleeping-giant", "name": "Sleeping Giant Provincial Park", "kind": "campground", "location": { "coordinates": { "lat": 48.362, "lng": -88.8 } }, "tags": ["overnight"] },
+    { "id": "thunder-bay-charge", "name": "Thunder Bay", "kind": "charging", "location": { "coordinates": { "lat": 48.3809, "lng": -89.2477 } }, "tags": ["required-route-anchor"] },
+    { "id": "kenora-charge", "name": "Kenora", "kind": "charging", "location": { "coordinates": { "lat": 49.767, "lng": -94.489 } }, "tags": ["required-route-anchor"] },
+    { "id": "winnipeg-charge", "name": "Winnipeg", "kind": "charging", "location": { "coordinates": { "lat": 49.8951, "lng": -97.1384 } }, "tags": ["required-route-anchor"] },
+    { "id": "winnipeg-comfort", "name": "Comfort Inn South Winnipeg", "kind": "hotel", "location": { "coordinates": { "lat": 49.792, "lng": -97.158 } }, "tags": ["overnight"] },
+    { "id": "brandon", "name": "Brandon", "kind": "service", "location": { "coordinates": { "lat": 49.8485, "lng": -99.9501 } }, "tags": ["required-route-anchor"] },
+    { "id": "regina-charge", "name": "Regina", "kind": "charging", "location": { "coordinates": { "lat": 50.4452, "lng": -104.6189 } }, "tags": ["required-route-anchor"] },
+    { "id": "swift-current", "name": "Swift Current", "kind": "service", "location": { "coordinates": { "lat": 50.2851, "lng": -107.7972 } }, "tags": ["required-route-anchor"] },
+    { "id": "medicine-hat-charge", "name": "Medicine Hat", "kind": "charging", "location": { "coordinates": { "lat": 50.0405, "lng": -110.6765 } }, "tags": ["required-route-anchor"] },
+    { "id": "cypress-hills", "name": "Cypress Hills / Elkwater D-41", "kind": "campground", "location": { "coordinates": { "lat": 49.6562, "lng": -110.2922 } }, "tags": ["overnight"] },
+    { "id": "calgary", "name": "Calgary", "kind": "service", "location": { "coordinates": { "lat": 51.0447, "lng": -114.0719 } }, "tags": ["required-route-anchor"] },
+    { "id": "canmore-charge", "name": "Canmore", "kind": "charging", "location": { "coordinates": { "lat": 51.089, "lng": -115.359 } }, "tags": ["required-route-anchor"] },
+    { "id": "bow-river", "name": "Bow River Campground Site 11", "kind": "campground", "location": { "coordinates": { "lat": 51.0606, "lng": -115.3179 } }, "tags": ["overnight", "electric-site"] },
+    { "id": "golden-charge", "name": "Golden", "kind": "charging", "location": { "coordinates": { "lat": 51.2961, "lng": -116.9631 } }, "tags": ["required-route-anchor"] },
+    { "id": "revelstoke-charge", "name": "Revelstoke", "kind": "charging", "location": { "coordinates": { "lat": 50.9981, "lng": -118.1957 } }, "tags": ["required-route-anchor"] },
+    { "id": "kamloops-charge", "name": "Kamloops", "kind": "charging", "location": { "coordinates": { "lat": 50.6745, "lng": -120.3273 } }, "tags": ["required-route-anchor"] },
+    { "id": "kamloops-hotel", "name": "Quality Inn Kamloops", "kind": "hotel", "location": { "coordinates": { "lat": 50.6518, "lng": -120.3719 } }, "tags": ["overnight"] },
+    { "id": "merritt", "name": "Merritt", "kind": "service", "location": { "coordinates": { "lat": 50.112, "lng": -120.794 } }, "tags": ["required-route-anchor"] },
+    { "id": "hope", "name": "Hope", "kind": "service", "location": { "coordinates": { "lat": 49.38, "lng": -121.441 } }, "tags": ["required-route-anchor"] },
+    { "id": "vancouver", "name": "Vancouver", "kind": "service", "location": { "coordinates": { "lat": 49.2827, "lng": -123.1207 } }, "tags": ["required-route-anchor"] },
+    { "id": "steveston-hotel", "name": "Steveston Waterfront Hotel", "kind": "hotel", "location": { "coordinates": { "lat": 49.125, "lng": -123.183 } }, "tags": ["overnight"] },
+    { "id": "tsawwassen-terminal", "name": "Tsawwassen", "kind": "ferry-terminal", "location": { "coordinates": { "lat": 49.007, "lng": -123.13 } }, "tags": ["required-route-anchor"] },
+    { "id": "swartz-bay-terminal", "name": "Swartz Bay", "kind": "ferry-terminal", "location": { "coordinates": { "lat": 48.689, "lng": -123.41 } }, "tags": ["required-route-anchor"] },
+    { "id": "langford-charge", "name": "Victoria / Langford", "kind": "charging", "location": { "coordinates": { "lat": 48.4284, "lng": -123.3656 } }, "tags": ["required-route-anchor"] },
+    { "id": "pedder-bay", "name": "Pedder Bay RV Resort", "kind": "campground", "location": { "coordinates": { "lat": 48.336, "lng": -123.548 } }, "tags": ["overnight"] },
+    { "id": "east-sooke-camp", "name": "Botanical Beach day", "kind": "campground", "location": { "coordinates": { "lat": 48.374, "lng": -123.7276 } }, "tags": ["overnight"] },
+    { "id": "port-alberni-charge", "name": "Port Alberni", "kind": "charging", "location": { "coordinates": { "lat": 49.2339, "lng": -124.8055 } }, "tags": ["required-route-anchor"] },
+    { "id": "ucluelet-camp", "name": "Ucluelet Campground", "kind": "campground", "location": { "coordinates": { "lat": 49.153, "lng": -125.906 } }, "tags": ["overnight"] },
+    { "id": "departure-bay-terminal", "name": "Departure Bay", "kind": "ferry-terminal", "location": { "coordinates": { "lat": 49.191, "lng": -123.955 } }, "tags": ["required-route-anchor"] },
+    { "id": "horseshoe-bay-terminal", "name": "Horseshoe Bay", "kind": "ferry-terminal", "location": { "coordinates": { "lat": 49.376, "lng": -123.272 } }, "tags": ["required-route-anchor"] },
+    { "id": "squamish-charge", "name": "Squamish / Whistler", "kind": "charging", "location": { "coordinates": { "lat": 49.7016, "lng": -123.1558 } }, "tags": ["required-route-anchor"] },
+    { "id": "whistler-hotel", "name": "Pinnacle Hotel Whistler Village", "kind": "hotel", "location": { "coordinates": { "lat": 50.1157, "lng": -122.9573 } }, "tags": ["overnight"] },
+    { "id": "little-fort", "name": "Little Fort", "kind": "service", "location": { "coordinates": { "lat": 51.296, "lng": -120.108 } }, "tags": ["required-route-anchor"] },
+    { "id": "blue-river", "name": "Blue River", "kind": "service", "location": { "coordinates": { "lat": 52.8312, "lng": -119.2643 } }, "tags": ["required-route-anchor"] },
+    { "id": "jasper-camp", "name": "Whistlers Campground", "kind": "campground", "location": { "coordinates": { "lat": 52.852, "lng": -118.083 } }, "tags": ["overnight"] },
+    { "id": "edmonton-charge", "name": "Edmonton", "kind": "charging", "location": { "coordinates": { "lat": 53.5461, "lng": -113.4938 } }, "tags": ["required-route-anchor"] },
+    { "id": "edmonton-hotel", "name": "Argyll Plaza Hotel Edmonton", "kind": "hotel", "location": { "coordinates": { "lat": 53.502, "lng": -113.491 } }, "tags": ["overnight"] },
+    { "id": "vegreville", "name": "Vegreville", "kind": "attraction", "location": { "coordinates": { "lat": 53.278, "lng": -110.005 } }, "tags": ["required-route-anchor"] },
+    { "id": "north-battleford-charge", "name": "North Battleford", "kind": "charging", "location": { "coordinates": { "lat": 52.7575, "lng": -108.2861 } }, "tags": ["required-route-anchor"] },
+    { "id": "pike-lake", "name": "Pike Lake Provincial Park", "kind": "campground", "location": { "coordinates": { "lat": 52.1579, "lng": -106.6702 } }, "tags": ["overnight"] },
+    { "id": "yorkton", "name": "Yorkton", "kind": "service", "location": { "coordinates": { "lat": 51.2139, "lng": -102.4628 } }, "tags": ["required-route-anchor"] },
+    { "id": "winnipeg-humphry", "name": "Humphry Inn & Suites Winnipeg", "kind": "hotel", "location": { "coordinates": { "lat": 49.8948, "lng": -97.1366 } }, "tags": ["overnight"] },
+    { "id": "dinorwic", "name": "Dinorwic", "kind": "service", "location": { "coordinates": { "lat": 49.7833, "lng": -92.837 } }, "tags": ["required-route-anchor"] },
+    { "id": "neys", "name": "Neys Provincial Park", "kind": "campground", "location": { "coordinates": { "lat": 48.773, "lng": -86.607 } }, "tags": ["overnight"] },
+    { "id": "elliot-lake", "name": "Elliot Lake", "kind": "service", "location": { "coordinates": { "lat": 46.1879, "lng": -82.958 } }, "tags": ["required-route-anchor"] },
+    { "id": "espanola", "name": "Espanola", "kind": "service", "location": { "coordinates": { "lat": 46.2578, "lng": -81.769 } }, "tags": ["required-route-anchor"] },
+    { "id": "little-current", "name": "Little Current", "kind": "service", "location": { "coordinates": { "lat": 45.923, "lng": -82.263 } }, "tags": ["required-route-anchor"] },
+    { "id": "south-baymouth-hotel", "name": "Buckhorn Motel", "kind": "hotel", "location": { "coordinates": { "lat": 45.5745, "lng": -82.0143 } }, "tags": ["overnight"] },
+    { "id": "south-baymouth-terminal", "name": "South Baymouth", "kind": "ferry-terminal", "location": { "coordinates": { "lat": 45.556, "lng": -82.007 } }, "tags": ["required-route-anchor"] },
+    { "id": "tobermory-terminal", "name": "Tobermory", "kind": "ferry-terminal", "location": { "coordinates": { "lat": 44.9867, "lng": -81.254 } }, "tags": ["required-route-anchor"] },
+    { "id": "owen-sound", "name": "Owen Sound", "kind": "service", "location": { "coordinates": { "lat": 44.3894, "lng": -80.534 } }, "tags": ["required-route-anchor"] },
+    { "id": "barrie", "name": "Barrie", "kind": "service", "location": { "coordinates": { "lat": 44.3894, "lng": -79.6903 } }, "tags": ["required-route-anchor"] },
+
+    { "id": "nokomis-trail", "name": "Nokomis / Orphan Lake Trails", "kind": "trailhead", "location": { "coordinates": { "lat": 47.336, "lng": -84.79 } }, "notes": "Lake Superior PP 中等短徒步" },
+    { "id": "sea-lion-trail", "name": "Sea Lion Trail", "kind": "trailhead", "location": { "coordinates": { "lat": 48.333, "lng": -88.825 } }, "notes": "Sleeping Giant 经典短线" },
+    { "id": "golden-skybridge", "name": "Golden Skybridge", "kind": "attraction", "location": { "coordinates": { "lat": 51.302, "lng": -116.957 } }, "notes": "Canada Day 重点 stop" },
+    { "id": "giant-cedars", "name": "Giant Cedars Boardwalk", "kind": "trailhead", "location": { "coordinates": { "lat": 51.237, "lng": -118.144 } }, "notes": "时间够再走的古树木栈道" },
+    { "id": "columbia-lookout", "name": "Columbia Lookout", "kind": "lookout", "location": { "coordinates": { "lat": 50.674, "lng": -120.36 } }, "notes": "Kamloops 城市/河谷观景" },
+    { "id": "east-sooke-trail", "name": "East Sooke Coast Trail", "kind": "trailhead", "location": { "coordinates": { "lat": 48.329, "lng": -123.701 } }, "notes": "南岛海岸短线" },
+    { "id": "botanical-beach", "name": "Botanical Beach tide pools", "kind": "attraction", "location": { "coordinates": { "lat": 48.532, "lng": -124.423 } }, "notes": "低潮赶海核心点" },
+    { "id": "long-beach", "name": "Long Beach / Rainforest Trail", "kind": "trailhead", "location": { "coordinates": { "lat": 49.051, "lng": -125.688 } }, "notes": "Pacific Rim 核心" },
+    { "id": "wild-pacific-trail", "name": "Wild Pacific Trail", "kind": "trailhead", "location": { "coordinates": { "lat": 48.941, "lng": -125.546 } }, "notes": "Ucluelet 海岸线" },
+    { "id": "mount-robson", "name": "Mount Robson Viewpoint", "kind": "lookout", "location": { "coordinates": { "lat": 52.849, "lng": -118.586 } }, "notes": "Jasper 前短停" },
+    { "id": "athabasca-falls", "name": "Athabasca Falls", "kind": "attraction", "location": { "coordinates": { "lat": 52.664, "lng": -117.884 } }, "notes": "Jasper → Edmonton 短停" },
+    { "id": "usask-museum", "name": "USask Museum of Natural Sciences", "kind": "attraction", "location": { "coordinates": { "lat": 52.132, "lng": -106.632 } }, "notes": "Saskatoon 化石/自然史" },
+    { "id": "reed-lake", "name": "Reed Lake Scenic View", "kind": "lookout", "location": { "coordinates": { "lat": 50.416, "lng": -107.05 } }, "notes": "可选南线补看" },
+    { "id": "providence-bay", "name": "Providence Bay Beach", "kind": "attraction", "location": { "coordinates": { "lat": 45.675, "lng": -82.267 } }, "notes": "Manitoulin 晚上海滩" },
+    { "id": "chi-cheemaun-deck", "name": "Chi-Cheemaun ferry deck", "kind": "attraction", "location": { "coordinates": { "lat": 45.25, "lng": -81.63 } }, "notes": "收尾仪式感" }
+  ],
+  "days": [
+    {
+      "id": "day-01", "date": "2026-06-26", "title": "Toronto → Pancake Bay", "originPlaceId": "toronto", "destinationPlaceId": "pancake-bay",
+      "route": { "anchorPlaceIds": ["toronto", "sudbury-charge", "sault-charge", "pancake-bay"], "optionalStopPlaceIds": ["nokomis-trail"], "distanceKm": 700, "driveMinutes": 495 },
+      "stay": { "placeId": "pancake-bay", "type": "campground", "status": "completed", "amenities": [] },
+      "activities": [{ "placeId": "nokomis-trail", "priority": "optional", "notes": "Lake Superior PP 中等短徒步" }],
+      "notes": ["Lake Superior 北岸开场，Sudbury / Sault Ste. Marie 补电。"]
+    },
+    {
+      "id": "day-02", "date": "2026-06-27", "title": "Pancake Bay → Sleeping Giant", "originPlaceId": "pancake-bay", "destinationPlaceId": "sleeping-giant",
+      "route": { "anchorPlaceIds": ["pancake-bay", "wawa-charge", "white-river", "sleeping-giant"], "optionalStopPlaceIds": ["sea-lion-trail"], "distanceKm": 675, "driveMinutes": 480 },
+      "stay": { "placeId": "sleeping-giant", "type": "campground", "status": "completed", "amenities": [] },
+      "activities": [{ "placeId": "sea-lion-trail", "priority": "optional", "notes": "Sleeping Giant 经典短线" }],
+      "notes": ["北岸湖景最强段，Wawa / Thunder Bay 补电。"]
+    },
+    {
+      "id": "day-03", "date": "2026-06-28", "title": "Thunder Bay → Winnipeg", "originPlaceId": "sleeping-giant", "destinationPlaceId": "winnipeg-comfort",
+      "route": { "anchorPlaceIds": ["sleeping-giant", "thunder-bay-charge", "kenora-charge", "winnipeg-charge", "winnipeg-comfort"], "optionalStopPlaceIds": [], "distanceKm": 700, "driveMinutes": 465 },
+      "stay": { "placeId": "winnipeg-comfort", "type": "hotel", "status": "completed", "amenities": ["laundry", "parking"] },
+      "activities": [],
+      "notes": ["酒店恢复点：洗衣、补给、睡整觉。"]
+    },
+    {
+      "id": "day-04", "date": "2026-06-29", "title": "Winnipeg → Cypress Hills", "originPlaceId": "winnipeg-comfort", "destinationPlaceId": "cypress-hills",
+      "route": { "anchorPlaceIds": ["winnipeg-comfort", "brandon", "regina-charge", "swift-current", "medicine-hat-charge", "cypress-hills"], "optionalStopPlaceIds": [], "distanceKm": 945, "driveMinutes": 600 },
+      "stay": { "placeId": "cypress-hills", "type": "campground", "status": "completed", "amenities": [] },
+      "activities": [],
+      "notes": ["长草原日，Medicine Hat 补足再进营地。"]
+    },
+    {
+      "id": "day-05", "date": "2026-06-30", "title": "Cypress Hills → Bow River", "originPlaceId": "cypress-hills", "destinationPlaceId": "bow-river",
+      "route": { "anchorPlaceIds": ["cypress-hills", "medicine-hat-charge", "calgary", "canmore-charge", "bow-river"], "optionalStopPlaceIds": [], "distanceKm": 525, "driveMinutes": 330 },
+      "stay": { "placeId": "bow-river", "type": "campground", "status": "completed", "amenities": ["electric-site"] },
+      "activities": [],
+      "notes": ["落基山入口营地，Kananaskis pass 需要另买。"]
+    },
+    {
+      "id": "day-06", "date": "2026-07-01", "title": "Bow River → Kamloops", "originPlaceId": "bow-river", "destinationPlaceId": "kamloops-hotel",
+      "route": { "anchorPlaceIds": ["bow-river", "golden-charge", "revelstoke-charge", "kamloops-charge", "kamloops-hotel"], "optionalStopPlaceIds": ["golden-skybridge", "giant-cedars", "columbia-lookout"], "distanceKm": 520, "driveMinutes": 405 },
+      "stay": { "placeId": "kamloops-hotel", "type": "hotel", "status": "completed", "amenities": ["parking"] },
+      "activities": [
+        { "placeId": "golden-skybridge", "priority": "preferred", "notes": "Canada Day 重点 stop" },
+        { "placeId": "giant-cedars", "priority": "optional", "notes": "时间够再走的古树木栈道" },
+        { "placeId": "columbia-lookout", "priority": "optional", "notes": "Kamloops 城市/河谷观景" }
+      ],
+      "notes": ["Canada Day：Golden Skybridge、Giant Cedars、Columbia Lookout。"]
+    },
+    {
+      "id": "day-07", "date": "2026-07-02", "title": "Kamloops → Steveston", "originPlaceId": "kamloops-hotel", "destinationPlaceId": "steveston-hotel",
+      "route": { "anchorPlaceIds": ["kamloops-hotel", "merritt", "hope", "vancouver", "steveston-hotel"], "optionalStopPlaceIds": [], "distanceKm": 410, "driveMinutes": 285 },
+      "stay": { "placeId": "steveston-hotel", "type": "hotel", "status": "completed", "amenities": ["parking"] },
+      "activities": [],
+      "notes": ["第二天 Tsawwassen ferry，酒店到码头约半小时。"]
+    },
+    {
+      "id": "day-08", "date": "2026-07-03", "title": "Steveston → Pedder Bay", "originPlaceId": "steveston-hotel", "destinationPlaceId": "pedder-bay",
+      "route": { "anchorPlaceIds": ["steveston-hotel", "tsawwassen-terminal", "swartz-bay-terminal", "langford-charge", "pedder-bay"], "optionalStopPlaceIds": ["east-sooke-trail"], "distanceKm": 130, "driveMinutes": 210, "ferryMinutes": 95 },
+      "stay": { "placeId": "pedder-bay", "type": "campground", "status": "completed", "amenities": [] },
+      "activities": [{ "placeId": "east-sooke-trail", "priority": "preferred", "notes": "南岛海岸短线" }],
+      "notes": ["Tsawwassen morning ferry；下午 East Sooke / Pedder Bay。"]
+    },
+    {
+      "id": "day-09", "date": "2026-07-04", "title": "Pedder Bay → Botanical Beach", "originPlaceId": "pedder-bay", "destinationPlaceId": "east-sooke-camp",
+      "route": { "anchorPlaceIds": ["pedder-bay", "east-sooke-camp"], "optionalStopPlaceIds": ["botanical-beach"], "distanceKm": 240, "driveMinutes": 270 },
+      "stay": { "placeId": "east-sooke-camp", "type": "campground", "status": "completed", "amenities": [] },
+      "activities": [{ "placeId": "botanical-beach", "priority": "preferred", "notes": "低潮前后赶海，只观察 tide pools。" }],
+      "notes": ["低潮前后赶海，只观察 tide pools。"]
+    },
+    {
+      "id": "day-10", "date": "2026-07-05", "title": "Pedder Bay → Ucluelet", "originPlaceId": "east-sooke-camp", "destinationPlaceId": "ucluelet-camp",
+      "route": { "anchorPlaceIds": ["east-sooke-camp", "port-alberni-charge", "ucluelet-camp"], "optionalStopPlaceIds": ["long-beach", "wild-pacific-trail"], "distanceKm": 320, "driveMinutes": 300 },
+      "stay": { "placeId": "ucluelet-camp", "type": "campground", "status": "completed", "amenities": [] },
+      "activities": [
+        { "placeId": "long-beach", "priority": "preferred", "notes": "Pacific Rim 核心" },
+        { "placeId": "wild-pacific-trail", "priority": "preferred", "notes": "Ucluelet 海岸线" }
+      ],
+      "notes": ["Cathedral Grove、Long Beach、Wild Pacific Trail。"]
+    },
+    {
+      "id": "day-11", "date": "2026-07-06", "title": "Ucluelet → Whistler", "originPlaceId": "ucluelet-camp", "destinationPlaceId": "whistler-hotel",
+      "route": { "anchorPlaceIds": ["ucluelet-camp", "port-alberni-charge", "departure-bay-terminal", "horseshoe-bay-terminal", "squamish-charge", "whistler-hotel"], "optionalStopPlaceIds": [], "distanceKm": 350, "driveMinutes": 390, "ferryMinutes": 100 },
+      "stay": { "placeId": "whistler-hotel", "type": "hotel", "status": "completed", "amenities": ["parking"] },
+      "activities": [],
+      "notes": ["Departure Bay afternoon ferry，晚上 Whistler。"]
+    },
+    {
+      "id": "day-12", "date": "2026-07-07", "title": "Whistler → Jasper", "originPlaceId": "whistler-hotel", "destinationPlaceId": "jasper-camp",
+      "route": { "anchorPlaceIds": ["whistler-hotel", "kamloops-charge", "little-fort", "blue-river", "jasper-camp"], "optionalStopPlaceIds": ["mount-robson"], "distanceKm": 800, "driveMinutes": 570 },
+      "stay": { "placeId": "jasper-camp", "type": "campground", "status": "completed", "amenities": [] },
+      "activities": [{ "placeId": "mount-robson", "priority": "preferred", "notes": "Jasper 前短停" }],
+      "notes": ["Mount Robson / Jasper 进场日。"]
+    },
+    {
+      "id": "day-13", "date": "2026-07-08", "title": "Jasper → Edmonton", "originPlaceId": "jasper-camp", "destinationPlaceId": "edmonton-hotel",
+      "route": { "anchorPlaceIds": ["jasper-camp", "edmonton-charge", "edmonton-hotel"], "optionalStopPlaceIds": ["athabasca-falls"], "distanceKm": 385, "driveMinutes": 255 },
+      "stay": { "placeId": "edmonton-hotel", "type": "hotel", "status": "completed", "amenities": ["parking"] },
+      "activities": [{ "placeId": "athabasca-falls", "priority": "preferred", "notes": "Jasper → Edmonton 短停" }],
+      "notes": ["Athabasca Falls 短停；Edmonton 酒店修整。"]
+    },
+    {
+      "id": "day-14", "date": "2026-07-09", "title": "Edmonton → Pike Lake", "originPlaceId": "edmonton-hotel", "destinationPlaceId": "pike-lake",
+      "route": { "anchorPlaceIds": ["edmonton-hotel", "edmonton-charge", "vegreville", "north-battleford-charge", "pike-lake"], "optionalStopPlaceIds": ["usask-museum"], "distanceKm": 540, "driveMinutes": 345 },
+      "stay": { "placeId": "pike-lake", "type": "campground", "status": "completed", "amenities": [] },
+      "activities": [{ "placeId": "usask-museum", "priority": "optional", "notes": "Saskatoon 化石/自然史" }],
+      "notes": ["Vegreville Pysanka；USask Museum of Natural Sciences。"]
+    },
+    {
+      "id": "day-15", "date": "2026-07-10", "title": "Saskatoon → Winnipeg", "originPlaceId": "pike-lake", "destinationPlaceId": "winnipeg-humphry",
+      "route": { "anchorPlaceIds": ["pike-lake", "yorkton", "brandon", "winnipeg-charge", "winnipeg-humphry"], "optionalStopPlaceIds": ["reed-lake"], "distanceKm": 780, "driveMinutes": 495 },
+      "stay": { "placeId": "winnipeg-humphry", "type": "hotel", "status": "completed", "amenities": ["parking"] },
+      "activities": [{ "placeId": "reed-lake", "priority": "optional", "notes": "可选南线补看" }],
+      "notes": ["可选南线绕 Reed Lake Scenic View。"]
+    },
+    {
+      "id": "day-16", "date": "2026-07-11", "title": "Winnipeg → Neys", "originPlaceId": "winnipeg-humphry", "destinationPlaceId": "neys",
+      "route": { "anchorPlaceIds": ["winnipeg-humphry", "kenora-charge", "dinorwic", "thunder-bay-charge", "neys"], "optionalStopPlaceIds": [], "distanceKm": 1005, "driveMinutes": 660 },
+      "stay": { "placeId": "neys", "type": "campground", "status": "completed", "amenities": [] },
+      "activities": [],
+      "notes": ["Kenora、Kakabeka Falls、Terry Fox Lookout。"]
+    },
+    {
+      "id": "day-17", "date": "2026-07-12", "title": "Neys → South Baymouth", "originPlaceId": "neys", "destinationPlaceId": "south-baymouth-hotel",
+      "route": { "anchorPlaceIds": ["neys", "wawa-charge", "sault-charge", "elliot-lake", "espanola", "little-current", "south-baymouth-hotel"], "optionalStopPlaceIds": ["providence-bay"], "distanceKm": 730, "driveMinutes": 540 },
+      "stay": { "placeId": "south-baymouth-hotel", "type": "motel", "status": "completed", "amenities": ["parking"] },
+      "activities": [{ "placeId": "providence-bay", "priority": "optional", "notes": "Manitoulin 晚上海滩" }],
+      "notes": ["为次日 Chi-Cheemaun ferry 做准备。"]
+    },
+    {
+      "id": "day-18", "date": "2026-07-13", "title": "South Baymouth → Toronto", "originPlaceId": "south-baymouth-hotel", "destinationPlaceId": "toronto",
+      "route": { "anchorPlaceIds": ["south-baymouth-hotel", "south-baymouth-terminal", "tobermory-terminal", "owen-sound", "barrie", "toronto"], "optionalStopPlaceIds": ["chi-cheemaun-deck"], "distanceKm": 300, "driveMinutes": 270, "ferryMinutes": 120 },
+      "stay": { "placeId": "toronto", "type": "home", "status": "completed", "amenities": [] },
+      "activities": [{ "placeId": "chi-cheemaun-deck", "priority": "preferred", "notes": "收尾仪式感" }],
+      "notes": ["South Baymouth → Tobermory ferry，最后回 GTA。"]
+    }
+  ],
+  "generated": {
+    "generatorVersion": "0.2.0",
+    "routeDataFile": "data/road-routes.json"
+  }
+}

@@ -7,7 +7,7 @@
   "scripts": {
     "serve": "python3 -m http.server 8766",
     "build:routes": "node scripts/build-road-routes.mjs",
-    "check:tripspec": "node scripts/check-trip-spec.mjs examples/lakes-and-pines.trip.json",
+    "check:tripspec": "node scripts/check-trip-spec.mjs examples/lakes-and-pines.trip.json data/cross-canada.trip.json",
     "check:privacy": "node scripts/check-privacy.mjs"
   },
   "engines": {

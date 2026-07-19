@@ -31,24 +31,17 @@ Open `http://localhost:8766`.
 
 ## Customize a Trip
 
-The current prototype keeps its trip configuration near the top of the script in `index.html`:
+The Traveler reads its current public demo from [`data/cross-canada.trip.json`](data/cross-canada.trip.json). Edit or replace that TripSpec to change the cards, route anchors, ferries, stays, activities, and charging markers; `index.html` contains presentation logic only.
 
-- `days`: daily travel cards and overnight stops
-- `outbound` and `inbound`: route anchors
-- `ferries`: ferry-only segments
-- `activities`: optional points of interest
-- `chargers`: required charging anchors
-- `wildfireWatch`: hazard review points
+Only origins, destinations, ferry terminals, and required charging stops should be route anchors. Optional attractions should remain activities or optional stops so they do not force a detour.
 
-Only origins, destinations, ferry terminals, and required charging stops should be route anchors. Optional attractions should remain markers so they do not force a detour.
-
-New integrations should target [`TripSpec V1`](docs/TRIP-SPEC-V1.md) instead of adding more itinerary constants to `index.html`. The canonical JSON Schema is in [`schemas/trip-spec.v1.schema.json`](schemas/trip-spec.v1.schema.json), with a fictional example in [`examples/lakes-and-pines.trip.json`](examples/lakes-and-pines.trip.json).
+New integrations should target [`TripSpec V1`](docs/TRIP-SPEC-V1.md). The canonical JSON Schema is in [`schemas/trip-spec.v1.schema.json`](schemas/trip-spec.v1.schema.json), with a smaller fictional example in [`examples/lakes-and-pines.trip.json`](examples/lakes-and-pines.trip.json).
 
 ```bash
 npm run check:tripspec
 ```
 
-After changing route anchors, regenerate road geometry:
+After changing route anchors, regenerate road geometry from the same TripSpec:
 
 ```bash
 npm run build:routes
@@ -67,6 +60,7 @@ road-trip/
 ├── docs/TRIP-SPEC-V1.md
 ├── examples/*.trip.json
 ├── schemas/trip-spec.v1.schema.json
+├── data/cross-canada.trip.json
 ├── index.html
 ├── data/road-routes.json
 ├── scripts/build-road-routes.mjs

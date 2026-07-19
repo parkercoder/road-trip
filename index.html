@@ -539,7 +539,7 @@
     </div>
 
     <div class="bottom-strip">
-      <div class="summary"><span data-selected-summary>7/8 · Jasper → Edmonton</span><small>当前卡片</small></div>
+      <div class="summary"><span data-selected-summary>正在载入行程…</span><small>当前卡片</small></div>
       <div class="summary"><span>实时预警按需加载</span><small>Runtime feed</small></div>
     </div>
 
@@ -564,8 +564,8 @@
       <header class="drawer-head">
         <div class="drawer-title">
           <div>
-            <div class="muted">2026 Summer Cross Canada</div>
-            <h1>Road Trip</h1>
+            <div class="muted" data-trip-title>Road Trip</div>
+            <h1 data-app-title>Traveler</h1>
           </div>
           <button class="close" type="button" data-close aria-label="Close cards">‹</button>
         </div>
@@ -581,91 +581,132 @@
 
   <script src="vendor/leaflet/leaflet.js"></script>
   <script>
-    (function () {
+    (async function () {
       // Route anchors only: daily origins/destinations, ferry terminals and required charging stops.
-      // Activity markers belong in `activities` and must not be added to either route array.
-      const outbound = [
-        [43.6532,-79.3832],[46.4917,-80.9930],[46.5219,-84.3461],[46.9700,-84.7000],
-        [47.9925,-84.7740],[48.7553,-86.3447],[48.3620,-88.8000],[48.3809,-89.2477],
-        [49.7670,-94.4890],[49.8951,-97.1384],[49.8485,-99.9501],[50.4452,-104.6189],
-        [50.2851,-107.7972],[50.0405,-110.6765],[49.6562,-110.2922],[50.0405,-110.6765],
-        [51.0447,-114.0719],[51.1784,-115.5708],[51.2990,-116.9680],[50.9981,-118.1957],
-        [50.6745,-120.3273],[50.1120,-120.7940],[49.3800,-121.4410],[49.2827,-123.1207],
-        [49.0070,-123.1300],[48.6890,-123.4100],[48.4610,-123.5580],[49.2339,-124.8055],
-        [49.1530,-125.9060]
-      ];
+      // Activity markers come from `activities` and never alter the driven route.
+      const tripResponse = await fetch("data/cross-canada.trip.json", { cache: "no-store" });
+      if (!tripResponse.ok) throw new Error(`trip data ${tripResponse.status}`);
+      const tripSpec = await tripResponse.json();
+      const placeById = new Map(tripSpec.places.map(place => [place.id, place]));
 
-      const inbound = [
-        [49.1530,-125.9060],[49.2339,-124.8055],[49.1910,-123.9550],[49.3760,-123.2720],
-        [49.7016,-123.1558],[50.1170,-122.9540],[50.6745,-120.3273],[51.2960,-120.1080],
-        [52.8312,-119.2643],[52.8737,-118.0814],[53.5461,-113.4938],[53.2780,-110.0050],
-        [52.7575,-108.2860],[52.1579,-106.6702],[51.2139,-102.4628],[49.8485,-99.9501],
-        [49.8951,-97.1384],[49.7670,-94.4890],[49.7833,-92.8370],[48.3809,-89.2477],
-        [48.7730,-86.6070],[47.9925,-84.7740],[46.5219,-84.3461],[46.1879,-82.9580],
-        [46.2578,-81.7690],[45.9230,-82.2630],[45.5560,-82.0070],[44.9867,-81.2540],
-        [44.3894,-80.5340],[44.3894,-79.6903],[43.6532,-79.3832]
-      ];
+      function positionFor(placeId) {
+        const coordinates = placeById.get(placeId)?.location?.coordinates;
+        if (!coordinates) throw new Error(`Missing coordinates for ${placeId}`);
+        return [coordinates.lat, coordinates.lng];
+      }
 
-      const ferries = [
-        { name:"Tsawwassen → Swartz Bay", dayId:"d7", coords:[[49.0070,-123.1300],[48.6890,-123.4100]], note:"7/3 morning sailing" },
-        { name:"Departure Bay → Horseshoe Bay", dayId:"d10", coords:[[49.1910,-123.9550],[49.3760,-123.2720]], note:"7/6 afternoon sailing" },
-        { name:"South Baymouth → Tobermory", dayId:"d17", coords:[[45.5560,-82.0070],[44.9867,-81.2540]], note:"7/13 ferry crossing" }
-      ];
+      function directionColor(day) {
+        const origin = positionFor(day.originPlaceId);
+        const destination = positionFor(day.destinationPlaceId);
+        return destination[1] < origin[1] ? "#1769d1" : "#d46a1f";
+      }
 
-      const days = [
-        { id:"d0", day:"6/26", title:"Toronto → Pancake Bay", name:"Pancake Bay Provincial Park", type:"camp", pos:[46.9700,-84.7000], distance:"约700 km", drive:"8-8.5h", note:"Lake Superior 北岸开场，Sudbury / Sault Ste. Marie 补电。" },
-        { id:"d1", day:"6/27", title:"Pancake Bay → Sleeping Giant", name:"Sleeping Giant Provincial Park", type:"camp", pos:[48.3620,-88.8000], distance:"650-700 km", drive:"7.5-8.5h", note:"北岸湖景最强段，Wawa / Thunder Bay 补电。" },
-        { id:"d2", day:"6/28", title:"Thunder Bay → Winnipeg", name:"Comfort Inn South Winnipeg", type:"hotel", pos:[49.7920,-97.1580], distance:"约700 km", drive:"7.5-8h", note:"酒店恢复点：洗衣、补给、睡整觉。" },
-        { id:"d3", day:"6/29", title:"Winnipeg → Cypress Hills", name:"Cypress Hills / Elkwater D-41", type:"camp", pos:[49.6562,-110.2922], distance:"920-970 km", drive:"9.5-10.5h", note:"长草原日，Medicine Hat 补足再进营地。" },
-        { id:"d4", day:"6/30", title:"Cypress Hills → Bow River", name:"Bow River Campground Site 11", type:"camp", pos:[51.0606,-115.3179], distance:"500-550 km", drive:"5-6h", note:"落基山入口营地，Kananaskis pass 需要另买。" },
-        { id:"d5", day:"7/1", title:"Bow River → Kamloops", name:"Quality Inn Kamloops", type:"hotel", pos:[50.6518,-120.3719], distance:"500-540 km", drive:"6.5-7h", note:"Canada Day：Golden Skybridge、Giant Cedars、Columbia Lookout。" },
-        { id:"d6", day:"7/2", title:"Kamloops → Steveston", name:"Steveston Waterfront Hotel", type:"hotel", pos:[49.1250,-123.1830], distance:"390-430 km", drive:"4.5-5h", note:"第二天 Tsawwassen ferry，酒店到码头约半小时。" },
-        { id:"d7", day:"7/3", title:"Steveston → Pedder Bay", name:"Pedder Bay RV Resort", type:"camp", pos:[48.3360,-123.5480], distance:"110-150 km + ferry", drive:"4-5h 含上船", note:"Tsawwassen 10:00 ferry；下午 East Sooke / Pedder Bay。" },
-        { id:"d8", day:"7/4", title:"Pedder Bay → Botanical Beach", name:"Botanical Beach day", type:"camp", pos:[48.3740,-123.7276], distance:"220-260 km", drive:"4-5h", note:"低潮前后赶海，只观察 tide pools。" },
-        { id:"d9", day:"7/5", title:"Pedder Bay → Ucluelet", name:"Ucluelet Campground", type:"camp", pos:[49.1530,-125.9060], distance:"300-340 km", drive:"4.5-5.5h", note:"Cathedral Grove、Long Beach、Wild Pacific Trail。" },
-        { id:"d10", day:"7/6", title:"Ucluelet → Whistler", name:"Pinnacle Hotel Whistler Village", type:"hotel", pos:[50.1157,-122.9573], distance:"330-370 km + ferry", drive:"7-8h 含上船", note:"Departure Bay 13:20 ferry，晚上 Whistler。" },
-        { id:"d11", day:"7/7", title:"Whistler → Jasper", name:"Whistlers Campground", type:"camp", pos:[52.8520,-118.0830], distance:"780-820 km", drive:"9-10h", note:"Mount Robson / Jasper 进场日。" },
-        { id:"d12", day:"7/8", title:"Jasper → Edmonton", name:"Argyll Plaza Hotel Edmonton", type:"hotel", pos:[53.5020,-113.4910], distance:"360-410 km", drive:"4-4.5h", note:"Athabasca Falls 短停；Edmonton 酒店修整。", today:true },
-        { id:"d13", day:"7/9", title:"Edmonton → Pike Lake", name:"Pike Lake Provincial Park", type:"camp", pos:[52.1579,-106.6702], distance:"520-560 km", drive:"5.5-6h", note:"Vegreville Pysanka；USask Museum of Natural Sciences。" },
-        { id:"d14", day:"7/10", title:"Saskatoon → Winnipeg", name:"Humphry Inn & Suites Winnipeg", type:"hotel", pos:[49.8948,-97.1366], distance:"约780 km", drive:"8-8.5h", note:"可选南线绕 Reed Lake Scenic View。" },
-        { id:"d15", day:"7/11", title:"Winnipeg → Neys", name:"Neys Provincial Park", type:"camp", pos:[48.7730,-86.6070], distance:"980-1030 km", drive:"10.5-11.5h", note:"Kenora、Kakabeka Falls、Terry Fox Lookout。" },
-        { id:"d16", day:"7/12", title:"Neys → South Baymouth", name:"Buckhorn Motel", type:"hotel", pos:[45.5745,-82.0143], distance:"700-760 km", drive:"8.5-9.5h", note:"为 7/13 Chi-Cheemaun ferry 做准备。" },
-        { id:"d17", day:"7/13", title:"South Baymouth → Toronto", name:"Chi-Cheemaun / Tobermory / Toronto", type:"home", pos:[43.6532,-79.3832], distance:"约300 km + ferry", drive:"4-5h 含上船", note:"South Baymouth → Tobermory ferry，最后回 GTA。" }
-      ];
+      function deriveRouteData() {
+        const segments = [];
+        const ferryLegs = [];
+        let current = null;
+        let segmentNumber = 0;
 
-      const activities = [
-        ["Nokomis / Orphan Lake Trails", [47.3360,-84.7900], "d0", "Lake Superior PP 中等短徒步"],
-        ["Sea Lion Trail", [48.3330,-88.8250], "d1", "Sleeping Giant 经典短线"],
-        ["Golden Skybridge", [51.3020,-116.9570], "d5", "Canada Day 重点 stop"],
-        ["Giant Cedars Boardwalk", [51.2370,-118.1440], "d5", "时间够再走的古树木栈道"],
-        ["Columbia Lookout", [50.6740,-120.3600], "d5", "Kamloops 城市/河谷观景"],
-        ["East Sooke Coast Trail", [48.3290,-123.7010], "d7", "南岛海岸短线"],
-        ["Botanical Beach tide pools", [48.5320,-124.4230], "d8", "低潮赶海核心点"],
-        ["Long Beach / Rainforest Trail", [49.0510,-125.6880], "d9", "Pacific Rim 核心"],
-        ["Wild Pacific Trail", [48.9410,-125.5460], "d9", "Ucluelet 海岸线"],
-        ["Mount Robson Viewpoint", [52.8490,-118.5860], "d11", "Jasper 前短停"],
-        ["Athabasca Falls", [52.6640,-117.8840], "d12", "Jasper → Edmonton 短停"],
-        ["USask Museum of Natural Sciences", [52.1320,-106.6320], "d13", "Saskatoon 化石/自然史"],
-        ["Reed Lake Scenic View", [50.4160,-107.0500], "d14", "可选南线补看"],
-        ["Providence Bay Beach", [45.6750,-82.2670], "d16", "Manitoulin 晚上海滩"],
-        ["Chi-Cheemaun ferry deck", [45.2500,-81.6300], "d17", "收尾仪式感"]
-      ];
+        const flush = () => {
+          if (current?.coords.length > 1) {
+            current.id = `route-${String(++segmentNumber).padStart(2, "0")}`;
+            segments.push(current);
+          }
+          current = null;
+        };
 
-      const chargers = [
-        ["Sudbury", [46.4917,-80.9930], "d0"], ["Sault Ste. Marie", [46.5219,-84.3461], "d0"],
-        ["Wawa", [47.9930,-84.7730], "d1"], ["Thunder Bay", [48.3809,-89.2477], "d1"],
-        ["Kenora", [49.7670,-94.4890], "d2"], ["Winnipeg", [49.8951,-97.1384], "d2"],
-        ["Regina", [50.4452,-104.6189], "d3"], ["Medicine Hat", [50.0405,-110.6765], "d3"],
-        ["Canmore", [51.0890,-115.3590], "d4"], ["Golden", [51.2961,-116.9631], "d5"],
-        ["Revelstoke", [50.9981,-118.1957], "d5"], ["Kamloops", [50.6745,-120.3273], "d5"],
-        ["Victoria / Langford", [48.4284,-123.3656], "d7"], ["Nanaimo", [49.1659,-123.9401], "d10"],
-        ["Port Alberni", [49.2339,-124.8055], "d9"], ["Squamish / Whistler", [49.7016,-123.1558], "d10"],
-        ["Valemount", [52.8312,-119.2643], "d11"], ["Edmonton", [53.5461,-113.4938], "d12"],
-        ["North Battleford", [52.7575,-108.2861], "d13"], ["Brandon", [49.8485,-99.9501], "d14"]
-      ];
+        tripSpec.days.forEach(day => {
+          const color = directionColor(day);
+          const anchors = day.route.anchorPlaceIds;
 
+          for (let index = 0; index < anchors.length - 1; index += 1) {
+            const from = placeById.get(anchors[index]);
+            const to = placeById.get(anchors[index + 1]);
+            const fromPos = positionFor(from.id);
+            const toPos = positionFor(to.id);
+
+            if (from.kind === "ferry-terminal" && to.kind === "ferry-terminal") {
+              flush();
+              ferryLegs.push({
+                name: `${from.name} → ${to.name}`,
+                dayId: day.id,
+                coords: [fromPos, toPos],
+                note: day.route.ferryMinutes
+                  ? `${day.date} · ferry ${day.route.ferryMinutes} min`
+                  : day.date
+              });
+              continue;
+            }
+
+            const continues = current
+              && current.color === color
+              && current.coords.at(-1)[0] === fromPos[0]
+              && current.coords.at(-1)[1] === fromPos[1];
+
+            if (!continues) {
+              flush();
+              current = { color, coords: [fromPos, toPos] };
+            } else {
+              current.coords.push(toPos);
+            }
+          }
+        });
+
+        flush();
+        return { segments, ferryLegs };
+      }
+
+      const dateFormatter = new Intl.DateTimeFormat(tripSpec.trip.locale || "zh-CN", {
+        month: "numeric",
+        day: "numeric",
+        timeZone: "UTC"
+      });
+      const todayIso = new Date().toLocaleDateString("en-CA", { timeZone: tripSpec.trip.timezone });
+      const { segments: routeSegments, ferryLegs: ferries } = deriveRouteData();
+
+      const days = tripSpec.days.map(day => {
+        const stay = day.stay ? placeById.get(day.stay.placeId) : placeById.get(day.destinationPlaceId);
+        const hasDriveTime = Number.isFinite(day.route.driveMinutes);
+        const driveHours = hasDriveTime ? Math.floor(day.route.driveMinutes / 60) : 0;
+        const driveRemainder = hasDriveTime ? day.route.driveMinutes % 60 : 0;
+        const drive = !hasDriveTime ? "时间待计算"
+          : driveRemainder ? `${driveHours}h ${driveRemainder}m`
+          : `${driveHours}h`;
+        const stayType = day.stay?.type || stay.kind;
+        return {
+          id: day.id,
+          day: dateFormatter.format(new Date(`${day.date}T00:00:00Z`)),
+          title: day.title,
+          name: stay.name,
+          type: stayType === "campground" || stayType === "rv-park" ? "camp"
+            : stayType === "hotel" || stayType === "motel" ? "hotel"
+            : "home",
+          pos: positionFor(stay.id),
+          distance: Number.isFinite(day.route.distanceKm) ? `约${Math.round(day.route.distanceKm)} km` : "里程待计算",
+          drive,
+          note: (day.notes || []).join(" ") || day.stay?.notes || "",
+          today: day.date === todayIso
+        };
+      });
+
+      const activities = tripSpec.days.flatMap(day =>
+        day.activities.map(activity => {
+          const place = placeById.get(activity.placeId);
+          return [place.name, positionFor(place.id), day.id, activity.notes || place.notes || ""];
+        })
+      );
+
+      const chargerByPlace = new Map();
+      tripSpec.days.forEach(day => {
+        day.route.anchorPlaceIds.forEach(placeId => {
+          const place = placeById.get(placeId);
+          if (place.kind === "charging" && !chargerByPlace.has(placeId)) {
+            chargerByPlace.set(placeId, [place.name, positionFor(placeId), day.id]);
+          }
+        });
+      });
+      const chargers = [...chargerByPlace.values()];
       const wildfireWatch = [];
-
       const drawer = document.querySelector("[data-drawer]");
       const cardsEl = document.querySelector("[data-cards]");
       const handle = document.querySelector("[data-handle]");
@@ -673,6 +714,11 @@
       const edgeZone = document.querySelector("[data-edge]");
       const selectedSummary = document.querySelector("[data-selected-summary]");
       const loadStatus = document.querySelector("[data-load-status]");
+      const tripTitle = document.querySelector("[data-trip-title]");
+      const appTitle = document.querySelector("[data-app-title]");
+      tripTitle.textContent = tripSpec.trip.title;
+      appTitle.textContent = "Road Trip";
+      document.title = `${tripSpec.trip.title} · Road Trip`;
       let map;
       let baseTiles;
       let chargerLayer;
@@ -781,7 +827,7 @@
       function fitRoute() {
         if (!map) return;
         map.invalidateSize({ pan: false, debounceMoveend: true });
-        const all = [...outbound, ...inbound, ...ferries.flatMap(f => f.coords)];
+        const all = [...routeSegments.flatMap(segment => segment.coords), ...ferries.flatMap(ferry => ferry.coords)];
         map.fitBounds(L.latLngBounds(all), { padding: [34, 34] });
       }
 
@@ -1016,18 +1062,20 @@
           .addTo(map);
 
         routeLayer = L.layerGroup().addTo(map);
-        straightRouteLines.push(
-          L.polyline(outbound, { color: "#ffffff", weight: 11, opacity: .82, pane: "routePane", renderer: routeRenderer }).addTo(routeLayer),
-          L.polyline(outbound, { color: "#1769d1", weight: 7, opacity: .98, pane: "routePane", renderer: routeRenderer }).addTo(routeLayer),
-          L.polyline(inbound, { color: "#ffffff", weight: 11, opacity: .82, pane: "routePane", renderer: routeRenderer }).addTo(routeLayer),
-          L.polyline(inbound, { color: "#d46a1f", weight: 7, opacity: .98, pane: "routePane", renderer: routeRenderer }).addTo(routeLayer)
-        );
+        routeSegments.forEach(segment => {
+          straightRouteLines.push(
+            L.polyline(segment.coords, { color: "#ffffff", weight: 11, opacity: .82, pane: "routePane", renderer: routeRenderer }).addTo(routeLayer),
+            L.polyline(segment.coords, { color: segment.color, weight: 7, opacity: .98, pane: "routePane", renderer: routeRenderer }).addTo(routeLayer)
+          );
+        });
         ferries.forEach(ferry => {
           L.polyline(ferry.coords, { color: "#7c3aed", weight: 5, opacity: .98, dashArray: "8 8", pane: "routePane", renderer: routeRenderer }).addTo(routeLayer);
           marker({ name:ferry.name, type:"ferry", pos:ferry.coords[0], dayId:ferry.dayId, note:ferry.note }).addTo(map);
         });
 
-        marker({ name:"Toronto", type:"home", pos:[43.6532,-79.3832], dayId:"d0", note:"起点 / 终点" }).addTo(map);
+        const originPlace = placeById.get(tripSpec.trip.originPlaceId);
+        const originPos = positionFor(originPlace.id);
+        marker({ name:originPlace.name, type:"home", pos:originPos, dayId:days[0].id, note:"起点 / 终点" }).addTo(map);
 
         days.forEach(day => {
           const m = marker({ name:day.name, type:day.type, pos:day.pos, dayId:day.id, note:`${day.day} · ${day.title}<br>${day.distance} · ${day.drive}` }).addTo(map);
@@ -1043,14 +1091,15 @@
         wildfireLayer = L.layerGroup().addTo(map);
         wildfireWatch.forEach(([name, pos, dayId]) => marker({ name, pos, dayId, note:"山火 / 烟雾 watch 点，出发前复核官方地图和道路状态。", type:"warn", extraClass:"warn" }).addTo(wildfireLayer));
 
-        L.marker([43.6532,-79.3832], {
+        const vehicleName = [tripSpec.vehicle.make, tripSpec.vehicle.model].filter(Boolean).join(" ") || "Vehicle";
+        L.marker(originPos, {
           icon: L.divIcon({
             className: "",
-            html: '<div class="model-y-pin">🚙 Model Y</div>',
-            iconSize: [82, 30],
-              iconAnchor: [41, 15]
+            html: `<div class="model-y-pin">🚙 ${vehicleName}</div>`,
+            iconSize: [124, 30],
+            iconAnchor: [120, 15]
           })
-        }).bindPopup(popupHtml("Model Y", "示例当前位置", todayDay.id, [43.6532,-79.3832]), { autoPan: false, keepInView: false }).addTo(map);
+        }).bindPopup(popupHtml(vehicleName, "示例当前位置", todayDay.id, originPos), { autoPan: false, keepInView: false }).addTo(map);
 
         const syncDetailLayers = () => {
           if (map.getZoom() >= 4) {
@@ -1179,7 +1228,11 @@
       window.addEventListener("pageshow", refreshMapViewport);
       window.addEventListener("load", refreshMapViewport);
       window.visualViewport?.addEventListener("resize", refreshMapViewport);
-    })();
+    })().catch(error => {
+      document.body.classList.add("map-error");
+      const loadStatus = document.querySelector("[data-load-status]");
+      if (loadStatus) loadStatus.textContent = "行程载入失败：" + error.message;
+    });
   </script>
 </body>
 </html>
