@@ -1,0 +1,577 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="Trip Builder — create, validate, import, save, and preview portable TripPlan files.">
+  <meta name="theme-color" content="#f7f4e8">
+  <title>Trip Builder</title>
+  <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
+  <style>
+    :root {
+      color-scheme: light;
+      --canvas: #f3f0e4;
+      --panel: #fffdf5;
+      --panel-strong: #fffaf0;
+      --text: #172033;
+      --muted: #687386;
+      --line: rgba(23, 32, 51, .16);
+      --primary: #135f57;
+      --primary-strong: #0d4943;
+      --accent: #e9a23b;
+      --danger: #b42318;
+      --danger-soft: #fff0ee;
+      --ok: #157347;
+      --ok-soft: #e8f6ed;
+      --shadow: 0 12px 34px rgba(39, 49, 66, .12);
+      font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 10% 0%, rgba(233, 162, 59, .15), transparent 28rem),
+        var(--canvas);
+    }
+
+    button,
+    input,
+    select,
+    textarea,
+    a { font: inherit; }
+
+    button,
+    .button {
+      min-height: 38px;
+      padding: 8px 12px;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      background: var(--panel);
+      color: var(--text);
+      cursor: pointer;
+      text-decoration: none;
+      font-weight: 750;
+    }
+
+    button:hover,
+    .button:hover { border-color: rgba(19, 95, 87, .5); }
+
+    button.primary,
+    .button.primary {
+      border-color: var(--primary);
+      background: var(--primary);
+      color: white;
+    }
+
+    button.primary:hover,
+    .button.primary:hover { background: var(--primary-strong); }
+
+    button.danger { color: var(--danger); }
+    button:disabled { cursor: not-allowed; opacity: .48; }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 12px max(16px, calc((100vw - 1440px) / 2));
+      border-bottom: 1px solid var(--line);
+      background: rgba(255, 253, 245, .92);
+      backdrop-filter: blur(18px);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--text);
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .brand-mark {
+      display: grid;
+      place-items: center;
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      background: var(--primary);
+      color: white;
+      font-size: 20px;
+    }
+
+    .brand strong { display: block; }
+    .brand small { color: var(--muted); }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .status {
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: var(--ok-soft);
+      color: var(--ok);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .status.invalid {
+      background: var(--danger-soft);
+      color: var(--danger);
+    }
+
+    .studio-shell {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(320px, 430px);
+      gap: 18px;
+      width: min(1440px, 100%);
+      margin: 0 auto;
+      padding: 20px 16px 72px;
+    }
+
+    .editor,
+    .preview-column { min-width: 0; }
+
+    .editor { display: grid; gap: 16px; }
+
+    .panel {
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: var(--panel);
+      box-shadow: 0 5px 18px rgba(39, 49, 66, .06);
+    }
+
+    .ai-panel {
+      border-color: rgba(19, 95, 87, .32);
+      background:
+        linear-gradient(135deg, rgba(19, 95, 87, .07), transparent 44%),
+        var(--panel);
+    }
+
+    .ai-kicker {
+      display: inline-flex;
+      margin-bottom: 7px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: var(--primary);
+      color: white;
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+
+    .ai-brief { min-height: 128px; }
+
+    .ai-actions {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .ai-privacy {
+      flex: 1 1 280px;
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .ai-status {
+      margin-top: 12px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: rgba(19, 95, 87, .08);
+      color: var(--primary-strong);
+      font-size: 13px;
+      font-weight: 750;
+    }
+
+    .ai-status.error { background: var(--danger-soft); color: var(--danger); }
+    .ai-status.success { background: var(--ok-soft); color: var(--ok); }
+
+    .ai-questions {
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
+      padding: 12px;
+      border: 1px dashed rgba(19, 95, 87, .35);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, .6);
+    }
+
+    .ai-questions p { margin-bottom: 0; }
+
+    .panel-head {
+      display: flex;
+      align-items: start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    h1,
+    h2,
+    h3,
+    p { margin-top: 0; }
+
+    h1 { margin-bottom: 3px; font-size: clamp(22px, 3vw, 32px); }
+    h2 { margin-bottom: 3px; font-size: 18px; }
+    h3 { margin-bottom: 2px; font-size: 16px; }
+    .muted { color: var(--muted); }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .form-grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .full { grid-column: 1 / -1; }
+
+    label.field {
+      display: grid;
+      align-content: start;
+      gap: 6px;
+      min-width: 0;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      min-height: 40px;
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      outline: none;
+      background: #fff;
+      color: var(--text);
+    }
+
+    textarea { min-height: 78px; resize: vertical; line-height: 1.45; }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(19, 95, 87, .12);
+    }
+
+    input[readonly] { background: #f1f1ec; color: var(--muted); }
+
+    .collection { display: grid; gap: 10px; }
+
+    .item-card {
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--panel-strong);
+    }
+
+    .item-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .item-head small { color: var(--muted); font-weight: 700; }
+
+    .item-actions { display: flex; gap: 7px; }
+
+    .route-list,
+    .activity-list {
+      display: grid;
+      gap: 7px;
+      margin-top: 8px;
+    }
+
+    .route-row,
+    .activity-row {
+      display: grid;
+      grid-template-columns: 28px minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .activity-row { grid-template-columns: minmax(0, 1fr) minmax(100px, .45fr) auto; }
+
+    .route-number {
+      display: grid;
+      place-items: center;
+      width: 26px;
+      height: 26px;
+      border-radius: 999px;
+      background: rgba(19, 95, 87, .11);
+      color: var(--primary);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .mini-button {
+      min-height: 34px;
+      padding: 5px 9px;
+      font-size: 12px;
+    }
+
+    .subsection {
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px dashed var(--line);
+    }
+
+    .subsection-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 8px;
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .preview-card {
+      position: sticky;
+      top: 82px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .preview-head { padding: 15px 16px; border-bottom: 1px solid var(--line); }
+    #studio-map { height: 420px; background: #dbe8df; }
+    #studio-map.picking { cursor: crosshair; outline: 3px solid var(--accent); outline-offset: -3px; }
+
+    .validation {
+      padding: 14px 16px 16px;
+      border-top: 1px solid var(--line);
+    }
+
+    .validation summary { cursor: pointer; font-weight: 850; }
+    .validation ul { margin: 10px 0 0; padding-left: 20px; color: var(--danger); font-size: 13px; }
+    .validation.ok ul { color: var(--ok); }
+
+    .feasibility-list { margin: 10px 0 0; padding-left: 20px; font-size: 13px; }
+    .feasibility-list li { margin-bottom: 6px; }
+    .feasibility-list .error { color: var(--danger); }
+    .feasibility-list .warning { color: #9a5b00; }
+    .feasibility-list .info { color: #365f8b; }
+    .feasibility-list .success { color: var(--ok); }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 12px;
+      padding: 12px 16px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .legend span::before {
+      content: "";
+      display: inline-block;
+      width: 9px;
+      height: 9px;
+      margin-right: 5px;
+      border-radius: 999px;
+      background: var(--primary);
+    }
+
+    .legend span:nth-child(2)::before { background: #7c3aed; }
+    .legend span:nth-child(3)::before { background: #b23b3b; }
+
+    .toast {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 1200;
+      max-width: min(360px, calc(100vw - 36px));
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: #172033;
+      color: white;
+      box-shadow: var(--shadow);
+      opacity: 0;
+      transform: translateY(12px);
+      pointer-events: none;
+      transition: .2s ease;
+    }
+
+    .toast.show { opacity: 1; transform: translateY(0); }
+    [hidden] { display: none !important; }
+
+    @media (max-width: 920px) {
+      .topbar { align-items: flex-start; padding: 10px 12px; }
+      .brand small { display: none; }
+      .studio-shell { grid-template-columns: 1fr; padding: 14px 10px 88px; }
+      .preview-column { order: -1; }
+      .preview-card { position: static; }
+      #studio-map { height: 290px; }
+    }
+
+    @media (max-width: 620px) {
+      .topbar { position: static; display: grid; }
+      .top-actions { justify-content: flex-start; }
+      .top-actions .status { order: -1; }
+      .form-grid,
+      .form-grid.three { grid-template-columns: 1fr; }
+      .full { grid-column: auto; }
+      .panel { padding: 14px; }
+      .activity-row { grid-template-columns: 1fr; }
+      .activity-row button { justify-self: start; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="index.html" aria-label="Back to Traveler">
+      <span class="brand-mark">🗺</span>
+      <span><strong>Trip Builder</strong><small>Portable trip planning</small></span>
+    </a>
+    <div class="top-actions">
+      <span class="status" data-save-status>已自动保存</span>
+      <button type="button" data-new>新建</button>
+      <label class="button" for="trip-import">导入 Plan</label>
+      <input id="trip-import" data-import type="file" accept="application/json,.json" hidden>
+      <button type="button" data-export>保存 Plan</button>
+      <button class="primary" type="button" data-preview>Trip Preview</button>
+    </div>
+  </header>
+
+  <main class="studio-shell">
+    <div class="editor">
+      <section class="panel ai-panel">
+        <div class="panel-head">
+          <div>
+            <span class="ai-kicker">AI assisted</span>
+            <h1>描述旅行，让 AI 生成初稿</h1>
+            <p class="muted">AI 只负责理解意图；生成后会按汽车、骑行、步行或飞行模式生成路线，并用确定性规则检查可行性。你仍可在下方手动修改全部内容。</p>
+          </div>
+        </div>
+        <label class="field full">旅行描述
+          <textarea class="ai-brief" data-ai-brief placeholder="例如：7月10日从多伦多出发，一家四口开电动车去班夫，12天往返。每天最多开5小时，优先住有电的营地，每三天住一次酒店，不经过美国。"></textarea>
+        </label>
+        <div class="form-grid three" style="margin-top:12px">
+          <label class="field">模型服务
+            <select data-ai-provider>
+              <option value="openai">OpenAI Responses API</option>
+              <option value="anthropic">Anthropic Claude</option>
+              <option value="gemini">Google Gemini</option>
+              <option value="deepseek">DeepSeek</option>
+              <option value="xai">xAI</option>
+              <option value="mistral">Mistral AI</option>
+              <option value="openrouter">OpenRouter</option>
+              <option value="compatible">自定义 OpenAI-compatible</option>
+            </select>
+          </label>
+          <label class="field">模型 ID
+            <select data-ai-model aria-label="模型 ID"></select>
+            <input data-ai-model-custom autocomplete="off" placeholder="填写你账户可用的模型 ID" hidden>
+            <small class="muted">常用文本模型来自厂商目录；如账户中型号不同，可选择“自定义模型 ID”。</small>
+          </label>
+          <label class="field">API Token
+            <input data-ai-token type="password" autocomplete="off" spellcheck="false" placeholder="仅保存在当前页面内存">
+          </label>
+          <label class="field full">API Endpoint
+            <input data-ai-endpoint type="url" value="https://api.openai.com/v1/responses" autocomplete="off">
+          </label>
+        </div>
+        <div class="ai-questions" data-ai-questions hidden></div>
+        <div class="ai-actions">
+          <button class="primary" type="button" data-ai-generate>分析需求并规划</button>
+          <p class="ai-privacy">Token 不会写入 TripPlan、浏览器存储或保存文件，只会直接发送给你选择的模型服务。公共静态部署适合个人 BYOK；团队部署应改用后端代理。</p>
+        </div>
+        <div class="ai-status" data-ai-status role="status" aria-live="polite" hidden></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <h1>设计一段新旅程</h1>
+            <p class="muted">所有内容保存在你的浏览器中。活动不会改变主路线，只有路线锚点会。</p>
+          </div>
+        </div>
+        <div class="form-grid" data-trip-fields></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <h2>出行设置</h2>
+            <p class="muted">用于规划约束和 Traveler 展示。</p>
+          </div>
+        </div>
+        <div class="form-grid three" data-travel-fields></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <h2>地点</h2>
+            <p class="muted">先建立住宿、机场、充电站和景点。地址修改后会自动重新定位并同步经纬度，请在地图上复核结果。</p>
+          </div>
+          <button type="button" data-add-place>＋ 地点</button>
+        </div>
+        <div class="collection" data-places></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <h2>每日计划</h2>
+            <p class="muted">锚点按顺序决定主路线；活动仅显示为可选停靠。</p>
+          </div>
+          <button type="button" data-add-day>＋ 一天</button>
+        </div>
+        <div class="collection" data-days></div>
+      </section>
+    </div>
+
+    <aside class="preview-column">
+      <div class="preview-card">
+        <div class="preview-head">
+          <h2 data-preview-title>路线预览</h2>
+          <span class="muted" data-preview-summary>0 个地点 · 0 天</span>
+        </div>
+        <div id="studio-map" aria-label="Studio route preview map"></div>
+        <div class="legend"><span>路线锚点</span><span>航班直线</span><span>轮渡</span><span>可选活动</span></div>
+        <details class="validation" data-validation open>
+          <summary data-validation-title>正在校验…</summary>
+          <ul data-validation-list></ul>
+        </details>
+        <details class="validation" data-feasibility open>
+          <summary data-feasibility-title>正在检查可行性…</summary>
+          <ul class="feasibility-list" data-feasibility-list></ul>
+        </details>
+      </div>
+    </aside>
+  </main>
+
+  <div class="toast" data-toast role="status" aria-live="polite"></div>
+
+  <script src="vendor/leaflet/leaflet.js"></script>
+  <script type="module" src="src/studio-app.mjs?v=20260719-9"></script>
+</body>
+</html>

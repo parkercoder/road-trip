@@ -12,6 +12,7 @@ Project: https://leafletjs.com/
 
 - OpenStreetMap contributors provide map and road-network data.
 - CARTO and Esri provide fallback basemap tiles.
-- Project OSRM is used by the optional route-generation script.
+- FOSSGIS-hosted OSRM car, bicycle, and foot services may generate Studio preview routes from OpenStreetMap network data.
+- Project OSRM is used by the optional route-generation script and provider adapter.
 
 Provider terms and attribution requirements continue to apply.

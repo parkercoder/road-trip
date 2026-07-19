@@ -289,14 +289,18 @@
     }
 
     .map-tool {
+      display: grid;
+      place-items: center;
       width: 40px;
       height: 40px;
+      padding: 0;
       border: 1px solid var(--line);
       border-radius: 999px;
       background: rgba(255, 255, 255, .84);
       color: #172033;
       box-shadow: 0 3px 14px rgba(23, 32, 51, .12);
       backdrop-filter: blur(12px);
+      text-decoration: none;
     }
 
     .edge-zone {
@@ -506,6 +510,64 @@
       align-items: start;
     }
 
+    .directions {
+      border-top: 1px solid var(--line);
+      padding-top: 8px;
+      font-size: 13px;
+    }
+
+    .directions summary {
+      cursor: pointer;
+      color: var(--primary);
+      font-weight: 800;
+    }
+
+    .directions ol {
+      display: grid;
+      gap: 0;
+      margin: 9px 0 0;
+      padding-left: 25px;
+    }
+
+    .directions li {
+      padding: 7px 0 7px 3px;
+      border-bottom: 1px solid rgba(127, 127, 127, .16);
+    }
+
+    .directions li span,
+    .directions li small {
+      display: block;
+    }
+
+    .directions li small {
+      margin-top: 2px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .directions li.direction-mode {
+      margin-left: -22px;
+      padding: 9px 8px;
+      border: 0;
+      border-radius: 9px;
+      background: rgba(20, 128, 94, .1);
+      color: var(--text);
+      font-weight: 850;
+      list-style: none;
+    }
+
+    .directions li.direction-mode.unresolved {
+      color: #9a3412;
+      background: #fff7ed;
+    }
+
+    .directions li.direction-warning {
+      display: block;
+      color: #9a3412;
+      background: #fffaf0;
+      line-height: 1.45;
+    }
+
     .fallback {
       position: absolute;
       inset: 0;
@@ -559,7 +621,7 @@
     <div class="fallback" role="alert">
       <div class="fallback-card">
         <strong>行程无法载入</strong>
-        <span data-error-detail>请检查行程地址和 TripSpec 内容。</span>
+        <span data-error-detail>请检查行程地址和 TripPlan 内容。</span>
         <a href="./">打开默认行程</a>
       </div>
     </div>
@@ -567,13 +629,14 @@
     <div class="load-status" data-load-status>正在加载真实地图…</div>
 
     <div class="map-tools">
+      <a class="map-tool" data-edit-trip href="studio.html" aria-label="在 Studio 中编辑行程">✎</a>
       <button class="map-tool" type="button" data-fit aria-label="显示完整路线">[&nbsp;]</button>
       <button class="map-tool" type="button" data-locate aria-label="显示当前位置">📍</button>
     </div>
 
     <div class="bottom-strip">
       <div class="summary"><span data-selected-summary>正在载入行程…</span><small>当前卡片</small></div>
-      <div class="summary"><span data-route-status>正在检查公路几何…</span><small>Route data</small></div>
+      <div class="summary"><span data-route-status>正在检查实际路线…</span><small>Route data</small></div>
     </div>
 
     <aside class="drawer" data-drawer aria-label="Travel card drawer">
@@ -613,6 +676,6 @@
   </main>
 
   <script src="vendor/leaflet/leaflet.js"></script>
-  <script type="module" src="src/traveler-app.mjs"></script>
+  <script type="module" src="src/traveler-app.mjs?v=20260719-9"></script>
 </body>
 </html>

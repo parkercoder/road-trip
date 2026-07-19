@@ -6,7 +6,7 @@ const tripFile = process.argv[2] || "data/cross-canada.trip.json";
 const spec = JSON.parse(await readFile(tripFile, "utf8"));
 const validationErrors = validateTripSpec(spec);
 if (validationErrors.length) {
-  throw new Error(`TripSpec validation failed:\n- ${validationErrors.join("\n- ")}`);
+  throw new Error(`TripPlan validation failed:\n- ${validationErrors.join("\n- ")}`);
 }
 const segments = deriveRouteSegments(spec);
 const outputFile = spec.generated?.routeDataFile || "data/road-routes.json";

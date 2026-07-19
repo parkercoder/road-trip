@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://road-trip.dev/schemas/trip-spec.v1.schema.json",
-  "title": "Road Trip TripSpec V1",
+  "title": "Road Trip TripPlan V1",
   "description": "Portable, provider-neutral source data for planning and rendering a road trip.",
   "type": "object",
   "additionalProperties": false,
@@ -175,7 +175,7 @@
       "required": ["mode", "fuelType"],
       "properties": {
         "mode": {
-          "enum": ["car", "campervan", "rv", "motorcycle"]
+          "enum": ["car", "campervan", "rv", "motorcycle", "airplane", "bicycle", "walking"]
         },
         "make": {
           "type": "string"
@@ -184,7 +184,7 @@
           "type": "string"
         },
         "fuelType": {
-          "enum": ["gasoline", "diesel", "hybrid", "electric"]
+          "enum": ["gasoline", "diesel", "hybrid", "electric", "aviation", "human"]
         },
         "practicalRangeKm": {
           "type": "number",
@@ -364,6 +364,7 @@
             "overnight",
             "campground",
             "hotel",
+            "airport",
             "charging",
             "fuel",
             "ferry-terminal",
@@ -389,6 +390,9 @@
             "mapUrl": {
               "type": "string",
               "format": "uri"
+            },
+            "coordinateStatus": {
+              "enum": ["resolved", "unverified", "stale"]
             }
           }
         },
@@ -535,6 +539,96 @@
         }
       }
     },
+    "routeManeuver": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type"],
+      "properties": {
+        "type": { "type": "string" },
+        "modifier": { "type": "string" },
+        "exit": { "type": "integer", "minimum": 1 },
+        "location": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": { "type": "number" }
+        }
+      }
+    },
+    "routeStep": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["distanceMeters", "durationSeconds", "instruction", "maneuver"],
+      "properties": {
+        "distanceMeters": { "type": "integer", "minimum": 0 },
+        "durationSeconds": { "type": "integer", "minimum": 0 },
+        "instruction": { "type": "string", "minLength": 1 },
+        "name": { "type": "string" },
+        "maneuver": { "$ref": "#/$defs/routeManeuver" }
+      }
+    },
+    "routeSegment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "dayId", "mode", "color", "distanceMeters", "durationSeconds", "geometry", "steps"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "dayId": { "$ref": "#/$defs/id" },
+        "mode": {
+          "enum": ["car", "campervan", "rv", "motorcycle", "bicycle", "walking"]
+        },
+        "anchorPlaceIds": {
+          "type": "array",
+          "minItems": 2,
+          "items": { "$ref": "#/$defs/id" }
+        },
+        "color": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+        "distanceMeters": { "type": "integer", "minimum": 0 },
+        "durationSeconds": { "type": "integer", "minimum": 0 },
+        "geometry": { "type": "string", "minLength": 2 },
+        "steps": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/routeStep" }
+        }
+      }
+    },
+    "unroutedSegment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "dayId", "mode", "fromPlaceId", "toPlaceId", "message"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "dayId": { "$ref": "#/$defs/id" },
+        "mode": {
+          "enum": ["car", "campervan", "rv", "motorcycle", "bicycle", "walking"]
+        },
+        "fromPlaceId": { "$ref": "#/$defs/id" },
+        "toPlaceId": { "$ref": "#/$defs/id" },
+        "message": { "type": "string", "minLength": 1 }
+      }
+    },
+    "routeData": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["generatedAt", "source", "tripId", "mode", "routeFingerprint", "segments"],
+      "properties": {
+        "generatedAt": { "type": "string", "format": "date-time" },
+        "source": { "type": "string", "minLength": 1 },
+        "tripId": { "$ref": "#/$defs/id" },
+        "mode": {
+          "enum": ["car", "campervan", "rv", "motorcycle", "airplane", "bicycle", "walking"]
+        },
+        "routeFingerprint": { "type": "string", "minLength": 1 },
+        "segments": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/routeSegment" }
+        },
+        "unroutedSegments": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/unroutedSegment" }
+        }
+      }
+    },
     "generated": {
       "type": "object",
       "additionalProperties": false,
@@ -549,6 +643,9 @@
         },
         "routeDataFile": {
           "type": "string"
+        },
+        "routeData": {
+          "$ref": "#/$defs/routeData"
         }
       }
     }

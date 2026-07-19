@@ -17,11 +17,20 @@ python3 -m http.server 8766
 
 Open `http://localhost:8766` and test at phone widths down to 320 px.
 
+Run the shared TripPlan and Trip Builder workflow tests:
+
+```bash
+npm test
+npm run check:tripplan
+npm run check:privacy
+```
+
 ## Pull Requests
 
 - Explain the user-facing problem and the chosen solution.
 - Include before/after screenshots for visual changes.
 - Verify map drag, pinch zoom, marker popups, drawer gestures, and the full-route control.
+- Verify Trip Builder autosave, Plan import/save, map coordinate picking, and draft handoff to Traveler.
 - Test both light and dark system themes.
 - Keep optional attractions out of route anchors.
 - Update documentation when behavior or configuration changes.

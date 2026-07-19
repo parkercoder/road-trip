@@ -11,10 +11,10 @@ for (const file of files) {
   const spec = JSON.parse(await readFile(file, "utf8"));
   const errors = validateTripSpec(spec);
   if (errors.length) {
-    console.error(`TripSpec validation failed for ${file}:\n- ${errors.join("\n- ")}`);
+    console.error(`TripPlan validation failed for ${file}:\n- ${errors.join("\n- ")}`);
     invalid = true;
   } else {
-    console.log(`TripSpec validation passed: ${file}`);
+    console.log(`TripPlan validation passed: ${file}`);
   }
 }
 

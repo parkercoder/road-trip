@@ -6,6 +6,7 @@ import {
   TripSpecError,
   createTravelerModel,
   deriveFerryLegs,
+  deriveFlightLegs,
   deriveRouteSegments,
   loadTripSpec,
   resolveTripUrl,
@@ -104,4 +105,35 @@ test("detects route geometry generated for another trip", () => {
 
 test("the committed TripSpec remains valid", () => {
   assert.deepEqual(validateTripSpec(crossCanada), []);
+});
+
+test("accepts walking trips and place addresses", () => {
+  const spec = structuredClone(crossCanada);
+  spec.vehicle.mode = "walking";
+  spec.vehicle.fuelType = "human";
+  spec.places[0].location.address = "Toronto, Ontario, Canada";
+  assert.deepEqual(validateTripSpec(spec), []);
+});
+
+test("accepts airports as durable places", () => {
+  const spec = structuredClone(crossCanada);
+  spec.places[0].kind = "airport";
+  assert.deepEqual(validateTripSpec(spec), []);
+});
+
+test("treats consecutive airport anchors as a direct flight leg", () => {
+  const spec = structuredClone(crossCanada);
+  const firstDay = spec.days[0];
+  const origin = spec.places.find(place => place.id === firstDay.originPlaceId);
+  const destination = spec.places.find(place => place.id === firstDay.destinationPlaceId);
+  origin.kind = "airport";
+  destination.kind = "airport";
+  firstDay.route.anchorPlaceIds = [origin.id, destination.id];
+  spec.days = [firstDay];
+
+  const flights = deriveFlightLegs(spec);
+  const roads = deriveRouteSegments(spec);
+  assert.equal(flights.length, 1);
+  assert.equal(flights[0].dayId, firstDay.id);
+  assert.deepEqual(roads, []);
 });
