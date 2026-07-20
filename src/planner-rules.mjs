@@ -1,4 +1,4 @@
-import { validateTripSpec } from "./trip-spec.mjs?v=20260719-9";
+import { validateTripSpec } from "./trip-spec.mjs?v=20260719-10";
 
 const HOTEL_TYPES = new Set(["hotel", "motel", "cabin", "rental"]);
 const ROAD_MODES = new Set(["car", "campervan", "rv", "motorcycle"]);

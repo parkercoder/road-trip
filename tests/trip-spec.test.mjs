@@ -17,7 +17,7 @@ import {
 const crossCanada = JSON.parse(await readFile("data/cross-canada.trip.json", "utf8"));
 
 test("resolves the default and a selected same-origin trip", () => {
-  const baseUrl = "https://road-trip.test/index.html";
+  const baseUrl = "https://road-trip.test/traveler.html";
   assert.equal(
     resolveTripUrl({ baseUrl }),
     `https://road-trip.test/${DEFAULT_TRIP_PATH}`
@@ -29,7 +29,7 @@ test("resolves the default and a selected same-origin trip", () => {
 });
 
 test("rejects cross-origin and non-JSON trip sources", () => {
-  const baseUrl = "https://road-trip.test/index.html";
+  const baseUrl = "https://road-trip.test/traveler.html";
   assert.throws(
     () => resolveTripUrl({ baseUrl, search: "?trip=https%3A%2F%2Fevil.test%2Ftrip.json" }),
     error => error instanceof TripSpecError && error.code === "unsupported-origin"
@@ -42,7 +42,7 @@ test("rejects cross-origin and non-JSON trip sources", () => {
 
 test("loads and validates a selected TripSpec", async () => {
   const result = await loadTripSpec({
-    baseUrl: "https://road-trip.test/index.html",
+    baseUrl: "https://road-trip.test/traveler.html",
     search: "?trip=data%2Fdemo.trip.json",
     fetchImpl: async url => ({
       ok: true,
@@ -59,7 +59,7 @@ test("loads and validates a selected TripSpec", async () => {
 test("reports invalid TripSpec data before rendering", async () => {
   await assert.rejects(
     loadTripSpec({
-      baseUrl: "https://road-trip.test/index.html",
+      baseUrl: "https://road-trip.test/traveler.html",
       fetchImpl: async () => ({ ok: true, status: 200, json: async () => ({ schemaVersion: "1.0" }) })
     }),
     error => error instanceof TripSpecError && error.code === "invalid-spec" && error.details.length > 0

@@ -67,7 +67,7 @@ test("persists a draft and hands it to the Traveler loader", async () => {
 
   const loaded = await loadTripSpec({
     search: "?draft=1",
-    baseUrl: "https://road-trip.test/index.html",
+    baseUrl: "https://road-trip.test/traveler.html",
     storage,
     fetchImpl: async () => { throw new Error("draft loading must not fetch"); }
   });

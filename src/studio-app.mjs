@@ -1,8 +1,8 @@
-import { deriveFerryLegs, deriveFlightLegs, deriveRouteSegments } from "./trip-spec.mjs?v=20260719-9";
-import { endpointFor, modelOptionsFor, requestAIPlan } from "./ai-planner.mjs?v=20260719-9";
-import { geocodeAddress } from "./geocoding-provider.mjs?v=20260719-9";
-import { evaluateFeasibility, feasibilitySummary } from "./planner-rules.mjs?v=20260719-9";
-import { enrichRoutePlan, hasCurrentRoutePlan, hasSurfaceRouteLegs } from "./route-provider.mjs?v=20260719-9";
+import { deriveFerryLegs, deriveFlightLegs, deriveRouteSegments } from "./trip-spec.mjs?v=20260719-10";
+import { endpointFor, modelOptionsFor, requestAIPlan } from "./ai-planner.mjs?v=20260719-10";
+import { geocodeAddress } from "./geocoding-provider.mjs?v=20260719-10";
+import { evaluateFeasibility, feasibilitySummary } from "./planner-rules.mjs?v=20260719-10";
+import { enrichRoutePlan, hasCurrentRoutePlan, hasSurfaceRouteLegs } from "./route-provider.mjs?v=20260719-10";
 import {
   addActivity,
   addDay,
@@ -23,7 +23,7 @@ import {
   setDayEndpoint,
   slugify,
   synchronizeTrip
-} from "./studio-core.mjs?v=20260719-9";
+} from "./studio-core.mjs?v=20260719-10";
 
 const PLACE_KINDS = [
   ["home", "Home / 起终点"], ["campground", "Campground / 营地"], ["hotel", "Hotel / 酒店"], ["airport", "Airport / 机场"],
@@ -557,7 +557,7 @@ async function previewInTraveler() {
       return;
     }
     saveDraft(spec);
-    window.location.href = "index.html?draft=1";
+    window.location.href = "traveler.html?draft=1";
   } catch (error) {
     plannerRuntimeIssues.push({
       severity: "error",

@@ -19,7 +19,7 @@ function assertVersionedImports(source, version, filename) {
 test("browser module graphs use one cache version", async () => {
   const [studioHtml, travelerHtml, studioApp, travelerApp, studioCore, plannerRules] = await Promise.all([
     readFile("studio.html", "utf8"),
-    readFile("index.html", "utf8"),
+    readFile("traveler.html", "utf8"),
     readFile("src/studio-app.mjs", "utf8"),
     readFile("src/traveler-app.mjs", "utf8"),
     readFile("src/studio-core.mjs", "utf8"),

@@ -31,17 +31,17 @@ The product is built around **TripPlan V1**: one portable JSON plan that can be 
 
 ## Quick Start / 快速开始
 
-Route and Plan data are loaded with `fetch`, so serve the directory over HTTP instead of opening `index.html` directly.
+Route and Plan data are loaded with `fetch`, so serve the directory over HTTP instead of opening the HTML files directly.
 
-路线和 Plan 数据通过 `fetch` 加载，因此请使用 HTTP 服务访问项目，不要直接双击打开 `index.html`。
+路线和 Plan 数据通过 `fetch` 加载，因此请使用 HTTP 服务访问项目，不要直接双击打开 HTML 文件。
 
 ```bash
 cd road-trip
 python3 -m http.server 8765
 ```
 
-- Trip Builder / 行程创建：`http://localhost:8765/studio.html`
-- Traveler demo / Traveler 示例：`http://localhost:8765`
+- Trip Builder / 行程创建：`http://localhost:8765`（根地址默认进入 Builder / the root opens Builder by default）
+- Traveler demo / Traveler 示例：`http://localhost:8765/traveler.html`
 
 To open another same-origin TripPlan without changing the application, pass its path in the URL. 如需打开同源的其他 TripPlan，可在 URL 中传入文件路径：
 
@@ -98,8 +98,9 @@ road-trip/
 ├── schemas/trip-spec.v1.schema.json
 ├── data/cross-canada.trip.json
 ├── data/road-routes.json
-├── index.html
-├── studio.html
+├── index.html                 # Default redirect / 默认入口跳转
+├── studio.html                # Trip Builder
+├── traveler.html              # Traveler
 ├── src/studio-core.mjs
 ├── src/studio-app.mjs
 ├── src/trip-spec.mjs

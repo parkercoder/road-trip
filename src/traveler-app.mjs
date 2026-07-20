@@ -1,5 +1,5 @@
-import { createTravelerModel, loadTripSpec, validateRouteData } from "./trip-spec.mjs?v=20260719-9";
-import { routeFingerprint } from "./route-provider.mjs?v=20260719-9";
+import { createTravelerModel, loadTripSpec, validateRouteData } from "./trip-spec.mjs?v=20260719-10";
+import { routeFingerprint } from "./route-provider.mjs?v=20260719-10";
 
 function showFatalError(error) {
   document.body.classList.add("map-error");

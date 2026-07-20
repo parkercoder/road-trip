@@ -74,7 +74,7 @@ Additional days begin at the previous day's destination. Trip start, end, origin
 - **Autosave / 自动保存：** Every change is saved to browser local storage. / 每次修改都会保存到浏览器本地存储。
 - **保存 Plan：** Downloads a validated portable `*.tripplan.json` file. / 校验后下载可移植的 `*.tripplan.json` 文件。
 - **导入 Plan：** Validates and replaces the local draft with a selected TripPlan; legacy `*.trip.json` files remain compatible. / 校验所选 TripPlan 并替换本地草稿；旧版 `*.trip.json` 仍然兼容。
-- **Trip Preview：** Opens `index.html?draft=1`, where Traveler renders the same local draft. / 打开 `index.html?draft=1`，由 Traveler 呈现同一份本地草稿。
+- **Trip Preview：** Opens `traveler.html?draft=1`, where Traveler renders the same local draft. / 打开 `traveler.html?draft=1`，由 Traveler 呈现同一份本地草稿。
 - **Edit from Traveler / 从 Traveler 编辑：** Press the pencil control to return without losing the draft. / 点击铅笔控件返回 Trip Builder，草稿不会丢失。
 
 Before preview, Trip Builder generates rebuildable inline `generated.routeData` when route data is missing or stale. Driving modes follow the OpenStreetMap car graph; bicycle and walking modes use dedicated graphs so endpoints snap to the nearest routable cycling or walking path, including mapped trails where permitted. Airplane trips remain point-to-point.

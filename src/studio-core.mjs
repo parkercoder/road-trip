@@ -1,4 +1,4 @@
-import { DRAFT_STORAGE_KEY, validateTripSpec } from "./trip-spec.mjs?v=20260719-9";
+import { DRAFT_STORAGE_KEY, validateTripSpec } from "./trip-spec.mjs?v=20260719-10";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
